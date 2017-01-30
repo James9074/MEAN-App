@@ -1,0 +1,24 @@
+<hr>
+<div class="row">
+	<div class="col-xs-5" style="text-align:center;">
+		<div class="smallMargin"><strong>{{user.firstName}} {{user.lastName}}</strong></div>
+		<a href="#"><img src="/images/no-avatar.png" class="img img-circle" height="100px" width="100px" style="border: solid 1px #ccc;"/></a>
+		<div class="smallMargin"><small>Joined {{joinedDate}}</small></div>
+	</div>
+	<div class="col-xs-1" style="border-left: solid 1px #eee;height:350px;"></div>
+	<div class="col-xs-6">
+		<ul class="nav nav-tabs">
+		  <li class="active"><a data-toggle="tab" href="#orgs">Organizations</a></li>
+		  <li><a data-toggle="tab" href="#subs">Subscriptions</a></li>
+		</ul>
+		<div class="tab-content">
+			<div id="orgs" class="tab-pane fade in active">
+				<h2>Your Organizations</h2>
+				<button type="button" class="btn">Create organization</button>
+			</div>
+			<div id="subs" class="tab-pane fade">
+				<h2>Your Subscriptions</h2>
+			</div>
+		</div>
+	</div>
+</div>

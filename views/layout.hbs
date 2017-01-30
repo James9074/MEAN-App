@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+  </head>
+  <body>
+  	<div class="container fill">
+	  	<div class="row">
+			<div class="col-xs-6">
+				<a href="/"><img id="mainImage" src="../images/logo-main.png" class="img img-responsive"></a>
+			</div>
+			<div class="col-xs-1"></div>
+			<div class="col-xs-5" id="menu">
+				{{#if user}}
+					<a class="menu-item" href="/dashboard">Dashboard</a>
+					<a class="menu-item" href="/logout">Logout</a>
+				{{else}}
+					<a class="menu-item" href="/login">Login</a>
+					<a class="menu-item" href="/register">Register</a>
+				{{/if}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				{{#if success_msg}}
+					<div class="alert alert-success">{{success_msg}}</div>
+				{{/if}}
+			</div>
+		</div>
+    	{{{body}}}
+    </div>
+    <script src='/javascripts/jquery-3.1.1.min.js'></script>
+    <script src='/javascripts/bootstrap.min.js'></script>
+  </body>
+</html>
+<style>
+	.smallMargin {
+		margin: 5px;
+	}
+	.container {
+		background: white;
+		border: 1px solid #ccc;
+		margin-top: 1px;
+		max-width:900px;
+	}
+	.fill {
+	    min-height: 100%;
+	    height:auto !important; /* cross-browser */
+	    height: 100%; /* cross-browser */
+	    display: block;
+	}
+	html, body {
+		height:100%;
+	}
+	h1, h2 {
+		color: #13842b;
+		font-weight: bold;
+	}
+	body {
+		border-top: 10px solid #2f9b46;
+		background: #f1f1f1;
+	}
+	.sidebar {
+		margin-top: 20px;
+	}
+	#menu {
+		margin-top: 135px;
+		margin-bottom: 25px;
+	}
+	#menu a {
+		color: #555555;
+		font-size: 22px;
+		font-weight: bold;
+	}
+	#menu .menu-item {
+		margin-right:10px;
+	}
+	#menu a:hover {
+		color: #13842b;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.point:hover {
+		cursor: pointer;
+	}
+	.text-left {
+		text-align: left;
+	}
+	.row {
+		margin-bottom: 10px;
+	}
+	.btn, .btn:hover, .btn:focus, .btn:active {
+		color: #fff;
+		background-color: #13842b;
+		outline: none;
+	}
+	p, li{
+		color: #5b5b5b;
+		line-height: 24px;
+	}
+	#mainImage {
+		margin: 10px;
+	}
+	#homepageSlider {
+	    position: relative;
+    	height: 300px;
+		background: url('../images/stockslider.jpg') 0 0 no-repeat;
+		background-size: cover;
+    	background-position: center center;
+    	overflow: hidden;
+	}
+	#homepageQuote h2 {
+		color: green;
+		font-size: 32px;
+		font-style: italic;
+		font-weight: normal;
+		line-height: 40px;
+		padding: 0;
+		margin: 0;
+		text-align: left;
+	}
+	#homepageQuote span, .sidebarQuote span {
+		display: block;
+		font-weight: bold;
+		font-size: 18px;
+		float: right;
+		color: #5b5b5b;
+	}
+	#spreadTheWord {
+		color: #5b5b5b;
+		line-height: 24px;
+	}
+	.tagline {
+    	font-size: 45px;
+    	font-weight: bold;
+    	color: #fff;
+    	position: absolute;
+    	top: 45%;
+    	left: 40%;
+    	text-shadow: 0 0 5px rgba(0, 0, 0, 1);
+    	width: 600px;
+    	text-align: left;
+    	line-height: 55px;
+	}
+	.sidebarQuote {
+		color: rgba(0, 0, 0, 0.5);
+		font-size: 25px;
+		font-style: italic;
+		font-weight: normal;
+		line-height: 35px;
+		padding: 30px 10px 0 10px;
+		margin: 0;
+		text-align: left;
+		float: left;
+	}
+	#registrationForm, #loginForm {
+		text-align: right;
+	}
+</style>

@@ -1,0 +1,55 @@
+<div id="menu" class="row">
+	<div class="col-xs-2">
+		<a>Home</a>
+	</div>
+	<div class="col-xs-2">
+		<a>Needs</a>
+	</div>
+	<div class="col-sm-2">
+		<a>Register</a>
+	</div>
+	<div class="col-xs-2">
+		<a>Login</a>
+	</div>
+</div>
+<hr>
+<h1>{{org.name}}</h1>
+<div class="row">
+	<div class="col-xs-6">
+	 	<div class="panel panel-default">
+	    	<div class="panel-heading">Welcome!</div>
+	    	<div class="panel-body">{{org.welcomeText}}</div>
+		</div>
+	</div>
+	<div class="col-xs-5">
+		<img class="img img-responsive img-thumbnail" src="../images/stock.jpg">
+	</div>
+	<div class="col-xs-1"></div>
+</div>
+<hr>
+<div class="row">
+	<div class="col-xs-8">
+	</div>
+	<div class="col-xs-4">
+	 	<div class="panel panel-default">
+	    	<div class="panel-heading">Thank you!</div>
+	    	<div class="panel-body">{{org.thankYouText}}</div>
+		</div>
+	</div>
+</div>
+<hr>
+<h1>Get the word out</h1>
+<div class="row">
+	<div class="col-xs-12" id="spreadTheWord">
+		Please help spread the word about {{org.name}} by contacting a friend below!
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-4">
+		<input type="text" placeholder="Email Address" class="form-control"/>
+	</div>
+	<div class="col-xs-2">
+		<input type="button" class="btn" value="Tell a Friend"/>
+	</div>
+	<div class="col-xs-6"></div>
+</div>
