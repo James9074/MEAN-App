@@ -1,10 +1,37 @@
 var express = require('express');
 var passport = require('passport');
 var moment = require('moment');
+var multer = require('multer');
+var crypto = require('crypto');
+var path = require('path');
 var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var Organization = require('../models/organization')
 var User = require('../models/user');
+
+//Upload file extension
+var storage = multer.diskStorage({
+	destination: function (req, file, cb){
+		cb(null, './public/uploads/');
+	},
+	filename: function (req, file, cb) {
+			crypto.pseudoRandomBytes(16, function(err, raw){
+				if (err) throw err;
+				cb(null, raw.toString('hex') + Date.now() + '.jpg'); //Appending .jpg
+			});
+	},
+});
+
+//Upload directory and file filter
+var uploading = multer({
+	storage: storage,
+	fileFilter: function(req, file, cb){
+		if (path.extname(file.originalname) !== '.jpg') {
+			return cb(null, false);
+		}
+		cb(null, true);
+	},
+});
 
 function ensureAuthenticated(req, res, next){
 	if (req.isAuthenticated()){
@@ -20,6 +47,33 @@ router.get('/', function(req, res, next) {
 	res.render('index', {layout: 'layout', title: 'Home | FaithByDeeds'});
 });
 
+/* GET logout */
+router.get('/logout', function(req, res, next) {
+	req.logout();
+	req.flash('success_msg', 'You are now logged out.');
+	res.redirect('/login');
+});
+
+/* GET and POST to dashboard */
+router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
+	res.render('dashboard', {layout: 'layout', title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', joinedDate: moment(req.user.createdAt).format('MMM DD, YYYY')});
+});
+
+router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), function(req, res) {
+	if (req.file) {
+		var avatar = {
+			fileName: req.file.filename,
+			originalName: req.file.originalname
+		}
+		req.user.avatar = avatar;
+		req.user.save();
+	} else {
+		req.flash('error', 'Image must be a jpeg. ');
+	}
+	res.redirect('/dashboard');
+})
+
+/* GET and POST to register */
 router.get('/register', function(req, res, next) {
 	res.render('register', {
 		layout: 'layout', 
@@ -28,21 +82,6 @@ router.get('/register', function(req, res, next) {
 	});
 });
 
-router.get('/login', function(req, res, next) {
-	res.render('login', {layout: 'layout', title: 'Login | FaithByDeeds', pageHeader: 'Login'});
-});
-
-router.get('/logout', function(req, res, next) {
-	req.logout();
-	req.flash('success_msg', 'You are now logged out.');
-	res.redirect('/login');
-});
-
-router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
-	res.render('dashboard', {layout: 'layout', title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', joinedDate: moment(res.locals.user.createdAt).format('MMM DD, YYYY')});
-});
-
-/* POST to /register */
 router.post('/register', function(req, res, next){
 	var firstName = req.body.firstName;
 	var lastName = req.body.lastName;
@@ -125,6 +164,12 @@ passport.deserializeUser(function(id, done) {
     done(err, user);
   });
 });
+
+/* GET and POST to login */
+router.get('/login', function(req, res, next) {
+	res.render('login', {layout: 'layout', title: 'Login | FaithByDeeds', pageHeader: 'Login'});
+});
+
 
 router.post('/login',
   passport.authenticate('local', {successRedirect:'/dashboard',failureRedirect:'/login', failureFlash:true}),

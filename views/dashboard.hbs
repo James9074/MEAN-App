@@ -1,8 +1,17 @@
 <hr>
 <div class="row">
 	<div class="col-xs-5" style="text-align:center;">
+		{{#if error}}
+			<div class="alert alert-danger">{{error}}</div>
+		{{/if}}
 		<div class="smallMargin"><strong>{{user.firstName}} {{user.lastName}}</strong></div>
-		<a href="#"><img src="/images/no-avatar.png" class="img img-circle" height="100px" width="100px" style="border: solid 1px #ccc;"/></a>
+		{{#if user.avatar}}
+			<img src="/uploads/{{user.avatar.fileName}}" 
+		onclick="$('#avatarUpload').click();" class="img img-circle" height="100px" width="100px" style="border: solid 1px #ccc;cursor: pointer;"/>
+		{{/if}}
+		<form method="POST" id="avatarForm" enctype="multipart/form-data">
+			<input id="avatarUpload" type="file" name="avatar" onchange="$('#avatarForm').submit();" style="display:none;"/>
+		</form>
 		<div class="smallMargin"><small>Joined {{joinedDate}}</small></div>
 	</div>
 	<div class="col-xs-1" style="border-left: solid 1px #eee;height:350px;"></div>

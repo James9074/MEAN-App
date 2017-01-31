@@ -11,6 +11,7 @@ var flash = require('connect-flash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var session = require('express-session');
+var multer = require('multer');
 
 var mongoose = require('mongoose');
 

@@ -1,6 +1,15 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs');
 
+var imgSchema = mongoose.Schema({
+	fileName: {
+		type: String,
+	},
+	originalName: {
+		type: String,
+	}
+});
+
 var userSchema = mongoose.Schema({
 	firstName: {
 		type: String,
@@ -19,8 +28,10 @@ var userSchema = mongoose.Schema({
 	password: {
 		type: String,
 		required: true
-	}
+	},
+	avatar: imgSchema,
 }, {timestamps: true});
+
 
 var User = module.exports = mongoose.model('User', userSchema);
 
