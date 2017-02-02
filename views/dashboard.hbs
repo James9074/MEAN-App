@@ -8,6 +8,9 @@
 		{{#if user.avatar}}
 			<img src="/uploads/{{user.avatar.fileName}}" 
 		onclick="$('#avatarUpload').click();" class="img img-circle" height="100px" width="100px" style="border: solid 1px #ccc;cursor: pointer;"/>
+		{{else}}
+			<img src="/images/no-avatar.png" 
+		onclick="$('#avatarUpload').click();" class="img img-circle" height="100px" width="100px" style="border: solid 1px #ccc;cursor: pointer;"/>		
 		{{/if}}
 		<form method="POST" id="avatarForm" enctype="multipart/form-data">
 			<input id="avatarUpload" type="file" name="avatar" onchange="$('#avatarForm').submit();" style="display:none;"/>
@@ -23,7 +26,14 @@
 		<div class="tab-content">
 			<div id="orgs" class="tab-pane fade in active">
 				<h2>Your Organizations</h2>
-				<button type="button" class="btn">Create organization</button>
+				<ul class="list-group">
+					{{#if orgs}}
+						{{#each orgs}}
+					    	<li class="list-group-item"><a href="/org/{{this.shortPath}}">{{this.name}}</a><span class="badge">0 Subscribers</span></li>
+						{{/each}}
+					{{/if}}
+  				</ul>
+				<a type="button" class="btn" href="/org-create">Create organization</a>
 			</div>
 			<div id="subs" class="tab-pane fade">
 				<h2>Your Subscriptions</h2>

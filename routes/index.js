@@ -56,7 +56,15 @@ router.get('/logout', function(req, res, next) {
 
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
-	res.render('dashboard', {layout: 'layout', title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', joinedDate: moment(req.user.createdAt).format('MMM DD, YYYY')});
+
+	Organization.getOrganizationsByAdmin(req.user.id, function(err, orgs){
+		if (err) throw err;
+		res.render('dashboard', {layout: 'layout', 
+			title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
+			joinedDate: moment(req.user.createdAt).format('MMM DD, YYYY'), 
+			orgs: orgs
+		});
+	});
 });
 
 router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), function(req, res) {
@@ -90,46 +98,45 @@ router.post('/register', function(req, res, next){
 	var confirmPassword = req.body.confirmPassword;
 
 	//Validation
-	req.checkBody('firstName', 'First name is required.').notEmpty();
-	req.checkBody('lastName', 'Last name is required.').notEmpty();
-	req.checkBody('email', 'Email is required.').notEmpty();
-	req.checkBody('email', 'Email is not valid.').isEmail();
-	req.checkBody('password', 'Password is required.').notEmpty();
-	req.checkBody('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
+	req.assert('firstName', 'First name is required.').notEmpty();
+	req.assert('lastName', 'Last name is required.').notEmpty();
+	req.assert('email', 'Email is required.').notEmpty();
+	req.assert('email', 'Email is not valid.').isEmail();
+	req.assert('password', 'Password is required.').notEmpty();
+	req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
+	req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
 
-	var errors = req.validationErrors();
+	req.getValidationResult().then(function(result){
 
-	if (errors){
-		console.log(errors);
-		res.render('register', {
-			layout: 'layout',
-			title: 'Registration',
-			pageHeader: 'Register',
-			errors: errors
-		});
-	} else {
-		var newUser = new User({
-			firstName: firstName,
-			lastName: lastName,
-			email: email,
-			password: password
-		});
+		if (!result.isEmpty()){
+			res.render('register', {
+				layout: 'layout',
+				title: 'Registration',
+				pageHeader: 'Register',
+				errors: result.useFirstErrorOnly().array()
+			});
+		} else {
+			var newUser = new User({
+				firstName: firstName,
+				lastName: lastName,
+				email: email,
+				password: password
+			});
 
-		User.createUser(newUser, function(err, user){
-			if ( err && err.code === 11000 ) {
-				req.flash('error', 'Email already in use.');
-				res.redirect('/register');
-			} else if (err){
-				req.flash('error', 'Oops. An error occurred.');
-				res.redirect('/register');			
-			} else {
-				req.flash('success_msg', 'You are now registered! You may log in.');
-				res.redirect('/login');
-			}
-		});
-
-
-	}
+			User.createUser(newUser, function(err, user){
+				if ( err && err.code === 11000 ) {
+					req.flash('error', 'Email already in use.');
+					res.redirect('/register');
+				} else if (err){
+					req.flash('error', 'Oops. An error occurred.');
+					res.redirect('/register');			
+				} else {
+					req.flash('success_msg', 'You are now registered! You may log in.');
+					res.redirect('/login');
+				}
+			});
+		}
+	});
 });
 
 passport.use(new LocalStrategy({
@@ -177,4 +184,72 @@ router.post('/login',
   	res.redirect('/dashboard');
   });
 
+/* GET and POST to org-create */
+router.get('/org-create', ensureAuthenticated, function(req, res, next){
+	res.render('org-create', {layout: 'layout', title: 'Create Organization | FaithByDeeds', pageHeader: 'Create Organization', });
+});
+
+router.post('/org-create', ensureAuthenticated, function(req, res, next){
+	var orgName = req.body.orgName;
+	var email = req.body.email;
+	var address = req.body.address;
+	var city = req.body.city;
+	var state = req.body.state;
+	var zip = req.body.zip;
+	var short = req.body.short;
+	var payment = req.body.payment;
+
+	//Validation
+	req.assert('orgName', 'Organization name is required.').notEmpty();
+	req.assert('email', 'Organization email is required.').notEmpty();
+	req.assert('email', 'Organization email is not valid.').isEmail();
+	req.assert('address', 'Address is required.').notEmpty();
+	req.assert('city', 'City is required.').notEmpty();
+	req.assert('state', 'State is required.').notEmpty();
+	req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars	
+	req.assert('short', 'Short path is required.').notEmpty();
+	req.assert('short', 'Short path can not contain special characters or spaces.').matches(/^[a-zA-Z0-9]*$/g);
+	req.assert('short', 'Short path must be between 5 to 20 characters.').isLength(5, 20);
+	req.assert('payment', 'Payment method is required.').notEmpty();
+
+	req.getValidationResult().then(function(result){
+		if (!result.isEmpty()){
+			res.render('org-create', {
+				layout: 'layout',
+				title: 'Create Organization | FaithByDeeds',
+				pageHeader: 'Create Organization',
+				errors: result.useFirstErrorOnly().array()
+			});
+		} else {
+			var newOrganization = new Organization({
+				admin: req.user.id,
+				name: orgName,
+				email: email,
+				address: address,
+				city: city,
+				state: state,
+				zip: zip,
+				shortPath: short,
+				paymentOption: payment,
+			});
+			Organization.createOrganization(newOrganization, function(err, org){
+				if ( err && err.code === 11000 ) {
+					req.flash('error', 'Short path already in use.');
+					res.redirect('/org-create');
+				} else if (err){
+					req.flash('error', 'Oops. An error occurred.');
+					res.redirect('/org-create');			
+				} else {
+					req.user.organizations.push(org.id);
+					req.user.save();
+					req.flash('success_msg', 'Success!');
+					res.redirect('/org/' + org.shortPath);
+				}
+			});
+
+		}
+	});
+
+
+});
 module.exports = router;

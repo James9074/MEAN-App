@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs');
 
+var ObjectId = mongoose.Schema.ObjectId;
+
 var imgSchema = mongoose.Schema({
 	fileName: {
 		type: String,
@@ -30,6 +32,7 @@ var userSchema = mongoose.Schema({
 		required: true
 	},
 	avatar: imgSchema,
+	organizations: [{ type: ObjectId, ref: 'Organization'}],
 }, {timestamps: true});
 
 

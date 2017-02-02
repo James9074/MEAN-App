@@ -1,0 +1,106 @@
+<hr>
+<div class="row">
+	<div class="col-xs-6">
+		<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+		{{#if errors}}
+			{{#each errors}}
+				<div class="alert alert-danger">{{msg}}</div>
+			{{/each}}
+		{{/if}}
+		{{#if error}}
+			<div class="alert alert-danger">{{error}}</div>
+		{{/if}}
+		<form id="orgCreateForm" method="post">
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="orgName">Organization name:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="orgName" name="orgName" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="email">Organization email:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="email" name="email" value="{{user.email}}" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="address">Address: <a data-toggle="tooltip" title="The physical address of the organization.">?</a></label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="address" name="address" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="city">City:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="city" name="city" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="state">State:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="state" name="state" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="zip">Zip:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="zip" name="zip" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="short">Short path: <a data-toggle="tooltip" title="This is a unique identifier for accessing the site. I.E. www.faithbydeeds.com/org/shortPath">?</a></label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="short" name="short" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="zip">Payment method: <a data-toggle="tooltip" title="The method in which FaithByDeeds delivers monetary donations to the organization.">?</a></label>
+				</div>
+				<div class="col-xs-7">
+				  	<select class="form-control" id="payment" name="payment">
+					    <option value="check">Check</option>
+					    <option value="paypal">Paypal</option>
+				 	</select>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12">
+					<input type="submit" class="btn" value="Create">
+				</div>
+			</div>				
+		</form>
+	</div>
+	<div class="col-xs-1" style="border-right: solid 1px #eee;height:350px;""></div>
+	<div class="col-xs-5 sidebar">
+		<p>
+			By creating an organization, you have the ability to:
+		</p> 
+				<ul>
+					<li>Publish and share organization needs</li>
+					<li>Declare and manage organization advocates</li>
+					<li>Invite donors to explore posted needs</li>
+				</ul>
+		<p>
+			Note: You may have up to 5 organizations.
+		</p>
+		<div class="sidebarQuote">
+			<h3>'Give, and it will be given to you. A good measure, pressed down, shaken together and running over, will be poured into your lap. For with the measure you use, it will be measured to you.'</h3>
+			<span>Luke 6:38</span>
+		</div>
+	</div>
+</div>

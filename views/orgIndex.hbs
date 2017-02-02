@@ -1,16 +1,13 @@
-<div id="menu" class="row">
-	<div class="col-xs-2">
-		<a>Home</a>
+<div class="row">
+	<div class="col-xs-6">
+		{{#if org.logo}}
+			<a href="/"><img src="../images/logo-main.png" id="mainImage" class="img" width="100" /></a>
+		{{else}}
+			<a href="/"><img src="../images/logo-main.png" id="mainImage" class="img img-responsive" /></a>
+		{{/if}}
+
 	</div>
-	<div class="col-xs-2">
-		<a>Needs</a>
-	</div>
-	<div class="col-sm-2">
-		<a>Register</a>
-	</div>
-	<div class="col-xs-2">
-		<a>Login</a>
-	</div>
+	<div class="row"></div>
 </div>
 <hr>
 <h1>{{org.name}}</h1>

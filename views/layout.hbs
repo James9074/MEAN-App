@@ -31,7 +31,16 @@
     	{{{body}}}
     </div>
     <script src='/javascripts/jquery-3.1.1.min.js'></script>
-    <script src='/javascripts/bootstrap.min.js'></script>
+    <script src='/javascripts/bootstrap.min.js'></script>   
+	<script>
+		$(document).ready(function(){
+	    	$('[data-toggle="tooltip"]').tooltip({
+	    		'selector': '',
+    			'placement': 'bottom',
+    			'container':'body'
+	    	});   
+		});
+	</script>
   </body>
 </html>
 <style>
@@ -95,6 +104,9 @@
 		background-color: #13842b;
 		outline: none;
 	}
+	.tooltip-inner {
+		max-width:350px;
+	}
 	p, li{
 		color: #5b5b5b;
 		line-height: 24px;
@@ -154,7 +166,7 @@
 		text-align: left;
 		float: left;
 	}
-	#registrationForm, #loginForm {
+	#registrationForm, #loginForm, #orgCreateForm {
 		text-align: right;
 	}
 </style>
