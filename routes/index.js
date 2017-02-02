@@ -57,14 +57,19 @@ router.get('/logout', function(req, res, next) {
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 
-	Organization.getOrganizationsByAdmin(req.user.id, function(err, orgs){
+	User.findOne({_id: req.user.id}).populate('organizations').exec(function(err, user){
 		if (err) throw err;
-		res.render('dashboard', {layout: 'layout', 
-			title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
-			joinedDate: moment(req.user.createdAt).format('MMM DD, YYYY'), 
-			orgs: orgs
-		});
+		if(user) {
+			res.render('dashboard', {layout: 'layout', 
+				title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
+				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'), 
+				orgs: user.organizations
+			});
+		} else {
+			next();
+		}
 	});
+
 });
 
 router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), function(req, res) {

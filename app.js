@@ -14,6 +14,7 @@ var session = require('express-session');
 var multer = require('multer');
 
 var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 
 // connect to our database
 var db = mongoose.connect('mongodb://localhost/FaithByDeeds');

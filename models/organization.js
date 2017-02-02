@@ -72,16 +72,16 @@ var organizationSchema = mongoose.Schema({
 
 var Organization = module.exports = mongoose.model('Organization', organizationSchema);
 
-module.exports.createOrganization = function(newOrganization, callback){
+module.exports.createOrganization = function(newOrganization, callback){ //With callback
 	newOrganization.save(callback);
-}
+} 
 
-module.exports.getOrganizationByShortPath = function (shortPath, callback){
+module.exports.getOrganizationByShortPath = function (shortPath, callback){ //With callback
 	var query = {shortPath: shortPath};
 	Organization.findOne(query, callback);
 }
 
-module.exports.getOrganizationsByAdmin = function (adminId, callback){
+module.exports.getOrganizationsByAdmin = function (adminId, callback){ //With callback
 	var query = {admin: adminId};
 	Organization.find(query, callback);
 }

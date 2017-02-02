@@ -6,6 +6,38 @@
   </head>
   <body>
   	<div class="container fill">
+  	<div class="row">
+		<div class="col-xs-5">
+			{{#if org.logo}}
+				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img" width="100" /></a>
+			{{else}}
+				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img img-responsive" /></a>
+			{{/if}}
+		</div>
+		<div class="col-xs-5" id="menu">
+				<a class="menu-item" href="./{{org.shortPath}}/needs">Needs</a>
+			{{#if user}}				
+				<a class="menu-item" href="/dashboard">Dashboard</a>
+				<a class="menu-item" href="/logout">Logout</a>
+			{{else}}
+				<a class="menu-item" href="/login">Login</a>
+				<a class="menu-item" href="/register">Register</a>
+			{{/if}}
+		</div>
+		<div class="col-xs-2" style="margin-top: 40px;">
+			{{#if isAdmin}}
+				<button type="button" class="btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
+
+				<ul class="dropdown-menu">
+					<li><a href="/org/{{org.shortPath}}/theme">Theme Settings</a></li>
+					<li><a href="/org/{{org.shortPath}}/settings">Organization Settings</a></li>
+					<li><a href="/org/{{org.shortPath}}/donations">Donation Management</a></li>
+				</ul>
+
+			{{/if}}
+		</div>
+	</div>
+	<hr>
     	{{{body}}}
     </div>
     <script src='/javascripts/jquery-3.1.1.min.js'></script>
@@ -40,7 +72,7 @@
 		margin: 10px;
 	}
 	#menu {
-		margin-top: 50px;
+		margin-top: 135px;
 		margin-bottom: 25px;
 	}
 	#menu a {
@@ -48,9 +80,15 @@
 		font-size: 22px;
 		font-weight: bold;
 	}
+	#menu .menu-item {
+		margin-right:10px;
+	}
 	#menu a:hover {
-		color: {{org.secondaryColor}};
+		color: #13842b;
 		text-decoration: none;
+		cursor: pointer;
+	}
+	.point:hover {
 		cursor: pointer;
 	}
 	.row {
