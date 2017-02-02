@@ -1,0 +1,70 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+<form id="themeForm" method="POST" enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-xs-5">
+			{{#if errors}}
+				{{#each errors}}
+					<div class="alert alert-danger">{{msg}}</div>
+				{{/each}}
+			{{/if}}
+			{{#if error}}
+				<div class="alert alert-danger">{{error}}</div>
+			{{/if}}
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="primaryColor">Primary Color:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control jscolor" id="primaryColor" name="primaryColor" value="{{org.primaryColor}}" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="secondaryColor">Secondary Color:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control jscolor" id="secondaryColor" name="secondaryColor" value="{{org.secondaryColor}}" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="logo">Logo:</label>
+				</div>
+				<div class="col-xs-7">
+					<input id="logo" type="file" name="logo" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="welcomeImage">Welcome Image:</label>
+				</div>
+				<div class="col-xs-7">
+					<input id="welcomeImage" type="file" name="welcomeImage" />
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-6" style="border-left: solid 1px #eee;height:350px;">
+			<div class="form-group row">
+				<div class="col-xs-4">
+					<label for="primaryColor">Welcome text:</label>
+				</div>
+				<div class="col-xs-8">
+					<textarea class="form-control" id="welcomeText" name="welcomeText" rows="6">{{org.welcomeText}}</textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-4">
+					<label for="primaryColor">Thank You text:</label>
+				</div>
+				<div class="col-xs-8">
+					<textarea class="form-control" id="thankYouText" name="thankYouText" rows="6">{{org.thankYouText}}</textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12">
+					<input type="submit" class="btn" value="Submit"/>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

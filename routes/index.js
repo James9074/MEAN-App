@@ -44,7 +44,7 @@ function ensureAuthenticated(req, res, next){
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('index', {layout: 'layout', title: 'Home | FaithByDeeds'});
+	res.render('base/index', {layout: 'layouts/layout', title: 'Home | FaithByDeeds'});
 });
 
 /* GET logout */
@@ -60,7 +60,7 @@ router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 	User.findOne({_id: req.user.id}).populate('organizations').exec(function(err, user){
 		if (err) throw err;
 		if(user) {
-			res.render('dashboard', {layout: 'layout', 
+			res.render('base/dashboard', {layout: 'layouts/layout', 
 				title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
 				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'), 
 				orgs: user.organizations
@@ -88,8 +88,8 @@ router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), funct
 
 /* GET and POST to register */
 router.get('/register', function(req, res, next) {
-	res.render('register', {
-		layout: 'layout', 
+	res.render('base/register', {
+		layout: 'layouts/layout', 
 		title: 'Registration | FaithByDeeds', 
 		pageHeader: 'Register'
 	});
@@ -114,8 +114,8 @@ router.post('/register', function(req, res, next){
 	req.getValidationResult().then(function(result){
 
 		if (!result.isEmpty()){
-			res.render('register', {
-				layout: 'layout',
+			res.render('base/register', {
+				layout: 'layouts/layout',
 				title: 'Registration',
 				pageHeader: 'Register',
 				errors: result.useFirstErrorOnly().array()
@@ -179,7 +179,7 @@ passport.deserializeUser(function(id, done) {
 
 /* GET and POST to login */
 router.get('/login', function(req, res, next) {
-	res.render('login', {layout: 'layout', title: 'Login | FaithByDeeds', pageHeader: 'Login'});
+	res.render('base/login', {layout: 'layouts/layout', title: 'Login | FaithByDeeds', pageHeader: 'Login'});
 });
 
 
@@ -191,7 +191,7 @@ router.post('/login',
 
 /* GET and POST to org-create */
 router.get('/org-create', ensureAuthenticated, function(req, res, next){
-	res.render('org-create', {layout: 'layout', title: 'Create Organization | FaithByDeeds', pageHeader: 'Create Organization', });
+	res.render('base/org-create', {layout: 'layouts/layout', title: 'Create Organization | FaithByDeeds', pageHeader: 'Create Organization', });
 });
 
 router.post('/org-create', ensureAuthenticated, function(req, res, next){
@@ -219,8 +219,8 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 
 	req.getValidationResult().then(function(result){
 		if (!result.isEmpty()){
-			res.render('org-create', {
-				layout: 'layout',
+			res.render('base/org-create', {
+				layout: 'layouts/layout',
 				title: 'Create Organization | FaithByDeeds',
 				pageHeader: 'Create Organization',
 				errors: result.useFirstErrorOnly().array()

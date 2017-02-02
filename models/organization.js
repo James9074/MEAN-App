@@ -2,6 +2,15 @@ var mongoose = require('mongoose');
 
 var ObjectId = mongoose.Schema.ObjectId;
 
+var imgSchema = mongoose.Schema({
+	fileName: {
+		type: String,
+	},
+	originalName: {
+		type: String,
+	}
+});
+
 var organizationSchema = mongoose.Schema({
 	admin: {
 		type: ObjectId,
@@ -52,6 +61,8 @@ var organizationSchema = mongoose.Schema({
 		type: String,
 		default: '#13842b',
 	},
+	logo: imgSchema,
+	welcomeImage: imgSchema,
 	welcomeText: {
 		type: String,
 		default: 'Thank you for visiting our Faith by Deeds site!'

@@ -7,15 +7,35 @@
   <body>
   	<div class="container fill">
   	<div class="row">
-		<div class="col-xs-5">
-			{{#if org.logo}}
-				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img" width="100" /></a>
-			{{else}}
-				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img img-responsive" /></a>
+		{{#if org.logo}}
+			<div class="col-xs-4">
+				<a href="/org/{{org.shortPath}}"><img src="/uploads/{{org.logo.fileName}}" id="orgLogo" class="img img-responsive col-xs-12" style="float:right;max-width:250px;"/></a>
+			</div>
+			<div class="col-xs-4">
+				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img img-responsive col-xs-12" style="max-width:135px;"/></a>
+			</div>
+		{{else}}
+			<div class="col-xs-5">
+				<a href="/"><img src="/images/logo-main.png" id="mainImage" class="img img-responsive col-xs-12" /></a>
+			</div>
+			<div class="col-xs-3"></div>
+		{{/if}}
+		<div class="col-xs-1"></div>
+		<div class="col-xs-2" style="margin-top:30px;">
+			{{#if isAdmin}}
+				<button type="button" class="btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
+				<ul class="dropdown-menu">
+					<li><a href="/org/{{org.shortPath}}/theme">Theme Settings</a></li>
+					<li><a href="/org/{{org.shortPath}}/settings">Organization Settings</a></li>
+					<li><a href="/org/{{org.shortPath}}/donations">Donation Management</a></li>
+				</ul>
 			{{/if}}
 		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-7"></div>
 		<div class="col-xs-5" id="menu">
-				<a class="menu-item" href="./{{org.shortPath}}/needs">Needs</a>
+			<a class="menu-item" href="./{{org.shortPath}}/needs">Needs</a>
 			{{#if user}}				
 				<a class="menu-item" href="/dashboard">Dashboard</a>
 				<a class="menu-item" href="/logout">Logout</a>
@@ -24,24 +44,20 @@
 				<a class="menu-item" href="/register">Register</a>
 			{{/if}}
 		</div>
-		<div class="col-xs-2" style="margin-top: 40px;">
-			{{#if isAdmin}}
-				<button type="button" class="btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
-
-				<ul class="dropdown-menu">
-					<li><a href="/org/{{org.shortPath}}/theme">Theme Settings</a></li>
-					<li><a href="/org/{{org.shortPath}}/settings">Organization Settings</a></li>
-					<li><a href="/org/{{org.shortPath}}/donations">Donation Management</a></li>
-				</ul>
-
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			{{#if success_msg}}
+				<div class="alert alert-success">{{success_msg}}</div>
 			{{/if}}
 		</div>
-	</div>
+	</div>	
 	<hr>
     	{{{body}}}
     </div>
     <script src='/javascripts/jquery-3.1.1.min.js'></script>
     <script src='/javascripts/bootstrap.min.js'></script>
+    <script src='/javascripts/jscolor.min.js'></script>
   </body>
 </html>
 <style>
@@ -60,7 +76,7 @@
 	html, body {
 		height:100%;
 	}
-		h1 {
+	h1, h2 {
 		color: {{org.primaryColor}};
 		font-weight: bold;
 	}
@@ -70,10 +86,6 @@
 	}
 	#mainImage {
 		margin: 10px;
-	}
-	#menu {
-		margin-top: 135px;
-		margin-bottom: 25px;
 	}
 	#menu a {
 		color: #555555;
@@ -92,7 +104,7 @@
 		cursor: pointer;
 	}
 	.row {
-		margin-bottom: 10px;
+
 	}
 	.btn, .btn:hover, .btn:focus, .btn:active {
 		color: #fff;
@@ -106,5 +118,8 @@
 	#spreadTheWord {
 		color: #5b5b5b;
 		line-height: 24px;
+	}
+	#themeForm {
+		text-align: right;
 	}
 </style>
