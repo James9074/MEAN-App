@@ -30,6 +30,10 @@
 					<li><a href="/org/{{org.shortPath}}/donations">Donation Management</a></li>
 				</ul>
 			{{/if}}
+
+			{{#unless isSubscriber}}
+				<a type="button" class="btn" href="/org/{{org.shortPath}}/subscribe">Subscribe</span></a>
+			{{/unless}}
 		</div>
 	</div>
 	<div class="row">
@@ -113,7 +117,8 @@
 	}
 	p {
 		color: #5b5b5b;
-		line-height: 24px;
+		line-height: 30px;
+		margin-top:10px;
 	}
 	#spreadTheWord {
 		color: #5b5b5b;

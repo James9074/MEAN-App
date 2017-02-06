@@ -29,7 +29,7 @@
 				<ul class="list-group">
 					{{#if orgs}}
 						{{#each orgs}}
-					    	<li class="list-group-item"><a href="/org/{{this.shortPath}}">{{this.name}}</a><span class="badge">0 Subscribers</span></li>
+					    	<li class="list-group-item"><a href="/org/{{this.shortPath}}">{{this.name}}</a><span class="badge">{{this.subscribers.length}} Subscriber(s)</span></li>
 						{{/each}}
 					{{/if}}
   				</ul>
@@ -37,6 +37,13 @@
 			</div>
 			<div id="subs" class="tab-pane fade">
 				<h2>Your Subscriptions</h2>
+				<ul class="list-group">
+					{{#if user}}
+						{{#each subbedOrgs}}
+					    		<li class="list-group-item"><a href="/org/{{this.shortPath}}">{{this.name}}</a><span class="badge">{{this.subscribers.length}} Subscriber(s)</span></li>
+						{{/each}}
+					{{/if}}
+  				</ul>
 			</div>
 		</div>
 	</div>

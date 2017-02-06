@@ -56,10 +56,12 @@ var organizationSchema = mongoose.Schema({
 	primaryColor: {
 		type: String,
 		default: '#2f9b46',
+		lowercase: true,
 	},
 	secondaryColor: {
 		type: String,
 		default: '#13842b',
+		lowercase: true,
 	},
 	logo: imgSchema,
 	welcomeImage: imgSchema,
@@ -79,6 +81,10 @@ var organizationSchema = mongoose.Schema({
 		+ ' forwarding our vision. To see a list of our current needs, click'
 		+ ' the button below.',
 	},
+	subscribers: [{
+		type: ObjectId,
+		ref: 'User',
+	}],
 }, {timestamps: true});
 
 var Organization = module.exports = mongoose.model('Organization', organizationSchema);

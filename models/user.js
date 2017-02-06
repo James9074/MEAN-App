@@ -33,6 +33,7 @@ var userSchema = mongoose.Schema({
 	},
 	avatar: imgSchema,
 	organizations: [{ type: ObjectId, ref: 'Organization'}],
+	subscriptions: [{ type: ObjectId, ref: 'Organization'}],
 }, {timestamps: true});
 
 

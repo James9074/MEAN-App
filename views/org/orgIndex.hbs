@@ -1,10 +1,8 @@
 <h1>{{org.name}}</h1>
 <div class="row">
 	<div class="col-xs-5">
-	 	<div class="panel panel-default">
-	    	<div class="panel-heading">Welcome!</div>
-	    	<div class="panel-body">{{org.welcomeText}}</div>
-		</div>
+		<p>{{org.welcomeText}}</p>
+
 	</div>
 	<div class="col-xs-6">
 		{{#if org.welcomeImage}}
@@ -20,10 +18,8 @@
 	<div class="col-xs-8">
 	</div>
 	<div class="col-xs-4">
-	 	<div class="panel panel-default">
-	    	<div class="panel-heading">Thank you!</div>
-	    	<div class="panel-body">{{org.thankYouText}}</div>
-		</div>
+		<h2>Thank you!</h2>
+		<p>{{org.thankYouText}}</p>
 	</div>
 </div>
 <hr>

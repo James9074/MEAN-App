@@ -57,13 +57,14 @@ router.get('/logout', function(req, res, next) {
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 
-	User.findOne({_id: req.user.id}).populate('organizations').exec(function(err, user){
+	User.findOne({_id: req.user.id}).populate('organizations').populate('subscriptions').exec(function(err, user){
 		if (err) throw err;
 		if(user) {
 			res.render('base/dashboard', {layout: 'layouts/layout', 
 				title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
 				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'), 
-				orgs: user.organizations
+				orgs: user.organizations,
+				subbedOrgs: user.subscriptions,
 			});
 		} else {
 			next();
@@ -237,6 +238,7 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 				shortPath: short,
 				paymentOption: payment,
 			});
+			newOrganization.subscribers.push(req.user.id);
 			Organization.createOrganization(newOrganization, function(err, org){
 				if ( err && err.code === 11000 ) {
 					req.flash('error', 'Short path already in use.');
@@ -246,9 +248,10 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 					res.redirect('/org-create');			
 				} else {
 					req.user.organizations.push(org.id);
+					req.user.subscriptions.push(org.id);
 					req.user.save();
-					req.flash('success_msg', 'Success!');
-					res.redirect('/org/' + org.shortPath);
+					req.flash('success_msg', 'Your organization has been created!');
+					res.redirect('/org/' + org.shortPath + '/theme');
 				}
 			});
 
