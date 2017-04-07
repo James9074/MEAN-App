@@ -1,0 +1,75 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+<form id="newNeedForm" method="POST" enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-xs-5">
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="needTitle">Need Title:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="needTitle" name="needTitle" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="needTitle">Quantity/Amount($):</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="amount" name="amount" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="secondaryColor">Need Type:</label>
+				</div>
+				<div class="col-xs-7">
+					<select class="form-control" id="needType">
+						<option>Monetary</option>
+						<option>Non-monetary</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="logo">Department:</label>
+				</div>
+				<div class="col-xs-7">
+					<select class="form-control" id="department">
+						<option>General</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="welcomeImage">Needed By:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="needDate" type="text" name="needDate" />
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-6" style="border-left: solid 1px #eee;height:350px;">
+			<div class="form-group row">
+				<div class="col-xs-4">
+					<label for="primaryColor">Description:</label>
+				</div>
+				<div class="col-xs-8">
+					<textarea class="form-control" id="description" name="description" rows="6" maxlength="400"></textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12">
+					<input type="submit" class="btn" value="Submit"/>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

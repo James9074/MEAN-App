@@ -37,18 +37,20 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-xs-7"></div>
-		<div class="col-xs-5" id="menu">
-			<a class="menu-item" href="./{{org.shortPath}}/needs">Needs</a>
+		<div class="col-xs-6"></div>
+		<div class="col-xs-6" id="menu">
+			<a class="menu-item" id="homeMenuItem" href="/org/{{org.shortPath}}">Home</a>
+			<a class="menu-item" id="needsMenuItem" href="/org/{{org.shortPath}}/needs">Needs</a>
 			{{#if user}}				
-				<a class="menu-item" href="/dashboard">Dashboard</a>
-				<a class="menu-item" href="/logout">Logout</a>
+				<a class="menu-item" id="dashboardMenuItem" href="/dashboard">Dashboard</a>
+				<a class="menu-item" id="logoutMenuItem" href="/logout">Logout</a>
 			{{else}}
-				<a class="menu-item" href="/login">Login</a>
-				<a class="menu-item" href="/register">Register</a>
+				<a class="menu-item" id="loginMenuItem" href="/login">Login</a>
+				<a class="menu-item" id="registerMenuItem" href="/register">Register</a>
 			{{/if}}
 		</div>
 	</div>
+	<hr>
 	<div class="row">
 		<div class="col-xs-12">
 			{{#if success_msg}}
@@ -56,12 +58,18 @@
 			{{/if}}
 		</div>
 	</div>	
-	<hr>
     	{{{body}}}
     </div>
     <script src='/javascripts/jquery-3.1.1.min.js'></script>
     <script src='/javascripts/bootstrap.min.js'></script>
     <script src='/javascripts/jscolor.min.js'></script>
+	<script>
+		$(document).ready(function(){
+	    	{{#if activeMenuItem}}
+	    		$('#{{activeMenuItem}}').addClass("active");
+	    	{{/if}}   
+		});
+	</script>
   </body>
 </html>
 <style>
@@ -76,6 +84,12 @@
 	    height:auto !important; /* cross-browser */
 	    height: 100%; /* cross-browser */
 	    display: block;
+	}
+	#menu .active, #menu .active:hover {
+		color: {{org.secondaryColor}};
+	}
+	.margin-bottom {
+		margin-bottom: 10px;
 	}
 	html, body {
 		height:100%;
@@ -100,7 +114,7 @@
 		margin-right:10px;
 	}
 	#menu a:hover {
-		color: #13842b;
+		color: {{org.secondaryColor}};
 		text-decoration: none;
 		cursor: pointer;
 	}
@@ -124,7 +138,11 @@
 		color: #5b5b5b;
 		line-height: 24px;
 	}
-	#themeForm {
+	#themeForm, #newNeedForm {
 		text-align: right;
+	}
+	#needsFilter {
+		padding: 10px;
+		border: solid 1px #eee;
 	}
 </style>

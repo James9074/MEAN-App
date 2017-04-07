@@ -12,11 +12,11 @@
 			</div>
 			<div class="col-xs-7" id="menu">
 				{{#if user}}
-					<a class="menu-item" href="/dashboard">Dashboard</a>
-					<a class="menu-item" href="/logout">Logout</a>
+					<a class="menu-item" id="dashboardMenuItem" href="/dashboard">Dashboard</a>
+					<a class="menu-item" id="logoutMenuItem" href="/logout">Logout</a>
 				{{else}}
-					<a class="menu-item" href="/login">Login</a>
-					<a class="menu-item" href="/register">Register</a>
+					<a class="menu-item" id="loginMenuItem" href="/login">Login</a>
+					<a class="menu-item" id="registerMenuItem" href="/register">Register</a>
 				{{/if}}
 			</div>
 		</div>
@@ -39,6 +39,9 @@
     			'container':'body'
 	    	});   
 		});
+    	{{#if activeMenuItem}}
+    		$('#{{activeMenuItem}}').addClass("active");
+    	{{/if}}   
 	</script>
   </body>
 </html>
@@ -80,6 +83,9 @@
 		color: #555555;
 		font-size: 22px;
 		font-weight: bold;
+	}
+	#menu .active, #menu .active:hover {
+		color: #13842b;
 	}
 	#menu .menu-item {
 		margin-right:10px;

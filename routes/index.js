@@ -57,7 +57,7 @@ router.get('/logout', function(req, res, next) {
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 
-	User.findOne({_id: req.user.id}).populate('organizations').populate('subscriptions').exec(function(err, user){
+	User.findOne({_id: req.user.id}).populate('organizations').populate('subscriptions', null, { admin: { $nin: [req.user.id] } }).exec(function(err, user){
 		if (err) throw err;
 		if(user) {
 			res.render('base/dashboard', {layout: 'layouts/layout', 
@@ -65,6 +65,7 @@ router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'), 
 				orgs: user.organizations,
 				subbedOrgs: user.subscriptions,
+				activeMenuItem: 'dashboardMenuItem',
 			});
 		} else {
 			next();
@@ -92,7 +93,8 @@ router.get('/register', function(req, res, next) {
 	res.render('base/register', {
 		layout: 'layouts/layout', 
 		title: 'Registration | FaithByDeeds', 
-		pageHeader: 'Register'
+		pageHeader: 'Register',
+		activeMenuItem: 'registerMenuItem',
 	});
 });
 
@@ -180,7 +182,7 @@ passport.deserializeUser(function(id, done) {
 
 /* GET and POST to login */
 router.get('/login', function(req, res, next) {
-	res.render('base/login', {layout: 'layouts/layout', title: 'Login | FaithByDeeds', pageHeader: 'Login'});
+	res.render('base/login', {layout: 'layouts/layout', title: 'Login | FaithByDeeds', pageHeader: 'Login', activeMenuItem: 'loginMenuItem'});
 });
 
 

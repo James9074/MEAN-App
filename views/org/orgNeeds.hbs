@@ -1,0 +1,18 @@
+<div class="row margin-bottom">
+	<div class="col-xs-1"></div>
+	<div class="col-xs-10" id="needsFilter">
+		Needs Filter
+	</div>
+	<div class="col-xs-1"></div>
+</div>
+
+{{#if isAdmin}}
+	<div class="row">
+		<div class="col-xs-1"></div>
+		<div class="col-xs-10">
+			<a type="button" class="btn" href="/org/{{org.shortPath}}/needs/new">+ Add New Need</a>
+			<a type="button" class="btn">Needs Archive &#187</a>
+		</div>
+		<div class="col-xs-1"></div>
+	</div>
+{{/if}}

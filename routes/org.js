@@ -59,6 +59,7 @@ router.get('/:name', function(req, res, next) {
 				org: org, 
 				isAdmin: isAdmin(org, req.user),
 				isSubscriber: isSubscriber(org, req.user),
+				activeMenuItem: 'homeMenuItem',
 			});
 		} else {
 			next();
@@ -86,6 +87,67 @@ router.get('/:name/subscribe', ensureAuthenticated, function (req, res, next){
 			next();
 		}
 	});
+
+});
+
+/* GET needs. */
+router.get('/:name/needs', function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
+				title: org.name, 
+				org: org, 
+				pageHeader: 'Needs', 
+				isAdmin: isAdmin(org, req.user), 
+				isSubscriber: isSubscriber(org, req.user),
+				activeMenuItem: 'needsMenuItem',
+			});
+		} else {
+			next();
+		}	
+	});
+});
+
+/* GET and POST to needs/new */
+router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				res.render('org/orgAddNeed', {layout: 'layouts/orgLayout',
+					title: org.name, 
+					org: org, 
+					pageHeader: 'Add Need', 
+					isAdmin: true, 
+					isSubscriber: true,
+				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}	
+	});
+});
+
+router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				req.flash('success_msg', 'Need was successfully created.');
+				res.redirect('/org/' + org.shortPath + '/needs');
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});	
 
 });
 
