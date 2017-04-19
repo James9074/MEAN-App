@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var ObjectId = mongoose.Schema.ObjectId;
 
-var organizationSchema = mongoose.Schema({
+var needSchema = mongoose.Schema({
 	creator: {
 		type: ObjectId,
 		ref: 'User',
@@ -21,21 +21,40 @@ var organizationSchema = mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	amount: {
+	goalAmount: { //The goal amount
 		type: Number,
 		min: 0,
 		required: false, //Not always applicable (e.g. Prayers)
 	},
+	currentAmount: { //The amount currently had
+		type: Number,
+		min: 0,
+		required: false,
+	},
+	progress: {
+		type: Number,
+		min: 0,
+		max: 100,
+		required: false,
+	},
 	needType: {
 		type: String,
-		enum: ['check','paypal'],
+		enum: ['monetary','non-monetary'],
 		required: true,
 	},
 	department: {
-		type: String, //This needs work - departments should have a schema
+		type: ObjectId,
+		ref: 'Department',
+		required: true,
 	},
 	needDate: {
 		type: Date,
 		required: false, //Not always applicable		
 	},
 }, {timestamps: true});
+
+var Need = module.exports = mongoose.model('Need', needSchema);
+
+module.exports.createNeed = function(newNeed, callback){ //With callback
+	newNeed.save(callback);
+} 

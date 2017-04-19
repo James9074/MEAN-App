@@ -81,6 +81,14 @@ var organizationSchema = mongoose.Schema({
 		+ ' forwarding our vision. To see a list of our current needs, click'
 		+ ' the button below.',
 	},
+	departments: [{
+		type: ObjectId,
+		ref: 'Department',
+	}],
+	needs: [{
+		type: ObjectId,
+		ref: 'Need',
+	}],
 	subscribers: [{
 		type: ObjectId,
 		ref: 'User',

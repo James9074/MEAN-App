@@ -7,7 +7,7 @@
 {{#if error}}
 	<div class="alert alert-danger">{{error}}</div>
 {{/if}}
-<form id="newNeedForm" method="POST" enctype="multipart/form-data">
+<form id="newNeedForm" method="POST">
 	<div class="row">
 		<div class="col-xs-5">
 			<div class="form-group row">
@@ -31,9 +31,9 @@
 					<label for="secondaryColor">Need Type:</label>
 				</div>
 				<div class="col-xs-7">
-					<select class="form-control" id="needType">
-						<option>Monetary</option>
-						<option>Non-monetary</option>
+					<select class="form-control" id="needType" name="needType">
+						<option value="monetary">Monetary</option>
+						<option value="non-monetary">Non-monetary</option>
 					</select>
 				</div>
 			</div>
@@ -42,8 +42,11 @@
 					<label for="logo">Department:</label>
 				</div>
 				<div class="col-xs-7">
-					<select class="form-control" id="department">
-						<option>General</option>
+					<select class="form-control" id="department" name="department">
+						
+						{{#each org.departments}}
+							<option value="{{this.id}}">{{this.departmentName}}</option>
+						{{/each}}
 					</select>
 				</div>
 			</div>
@@ -52,7 +55,7 @@
 					<label for="welcomeImage">Needed By:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="needDate" type="text" name="needDate" />
+					<input class="form-control datepicker" id="needDate" type="text" name="needDate" />
 				</div>
 			</div>
 		</div>

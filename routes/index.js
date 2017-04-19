@@ -6,7 +6,8 @@ var crypto = require('crypto');
 var path = require('path');
 var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
-var Organization = require('../models/organization')
+var Organization = require('../models/organization');
+var Department = require('../models/department.js');
 var User = require('../models/user');
 
 //Upload file extension
@@ -86,7 +87,7 @@ router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), funct
 		req.flash('error', 'Image must be a jpeg. ');
 	}
 	res.redirect('/dashboard');
-})
+});
 
 /* GET and POST to register */
 router.get('/register', function(req, res, next) {
@@ -240,7 +241,24 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 				shortPath: short,
 				paymentOption: payment,
 			});
+
+			//Create the General department
+			var newDepartment = new Department({
+				departmentName: 'General',
+			});
+
+			//The org admin is an advocate for the General department
+			newDepartment.advocates.push(req.user.id);
+
+			//Push the new department to the new organization
+			newOrganization.departments.push(newDepartment);
+
+			//The org admin is a subscriber to the organization
 			newOrganization.subscribers.push(req.user.id);
+
+			//Save the department
+			newDepartment.save();
+
 			Organization.createOrganization(newOrganization, function(err, org){
 				if ( err && err.code === 11000 ) {
 					req.flash('error', 'Short path already in use.');

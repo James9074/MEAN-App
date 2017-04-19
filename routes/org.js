@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var Organization = require('../models/organization');
+var Department = require('../models/department');
+var Need = require('../models/need');
 var User = require('../models/user');
 var multer = require('multer');
 var path = require('path');
@@ -113,7 +115,7 @@ router.get('/:name/needs', function(req, res, next) {
 /* GET and POST to needs/new */
 router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
 		if (err) throw err;
 		if (org){
 			if (isAdmin(org, req.user)) {
@@ -135,12 +137,93 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
 router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
 			if (isAdmin(org, req.user)) {
-				req.flash('success_msg', 'Need was successfully created.');
-				res.redirect('/org/' + org.shortPath + '/needs');
+
+				//Create need
+				var needTitle = req.body.needTitle;
+				var amount = req.body.amount;
+				var needType = req.body.needType;
+				var department = req.body.department;
+				var needDate = req.body.needDate;
+				var description = req.body.description;
+
+				//Validation
+				req.assert('needTitle', 'Need title is a required field.').notEmpty();
+				req.assert('amount', 'Quantity or Amount must be a positive number').isInt({min: 0});
+				req.assert('needType', 'Need type is a required field').notEmpty();
+				req.assert('department', 'Department is a required field.').notEmpty();
+				req.assert('needDate', 'Needed by must be a valid date.').isDate();
+				req.assert('needDate', 'Needed by must be a date later than today.').isAfter();
+				req.assert('discription', 'Description must be no more than 400 characters.').isLength(0,400);
+
+				req.getValidationResult().then(function(result){
+					if (!result.isEmpty()){
+						res.render('org/orgAddNeed', {layout: 'layouts/orgLayout',
+							title: org.name, 
+							org: org, 
+							pageHeader: 'Add Need', 
+							isAdmin: true,
+							isSubscriber: true,
+							errors: result.useFirstErrorOnly().array(),	
+						});						
+					} else {
+						//Make sure that the specified department exists and has the user listed as advocate
+						var deptArray = []; //The list of depts the user is an advocate for
+						var orgDepts = []; //The list of depts in the organization
+
+						Department.find({advocates: req.user.id}, function (err, depts) {
+							if (err){
+								return done(err);
+							}
+
+							depts.forEach(function(val){
+								deptArray.push(val.id);
+							});
+
+							//Now we need to generate an array of departments ACTUALLY in the organization
+							org.departments.forEach(function(dept){
+								orgDepts.push(dept.id);
+							});
+
+							//If either condition is false, the form must fail.
+							if ((deptArray.indexOf(department) == -1) || (orgDepts.indexOf(department) == -1)){
+
+								req.flash('error', 'An error occurred while processing the request.');
+								res.redirect('/org/' + org.shortPath + '/needs/new');
+							}
+							else{
+								//Create need
+								var newNeed = new Need({
+									creator: req.user.id,
+									organization: org.id,
+									title: needTitle,
+									description: description,
+									goalAmount: amount,
+									currentAmount: 0,
+									progress: 0,
+									needType: needType,
+									department: department,
+									needDate: needDate,
+								});
+
+								//Make sure we add the need to the organization
+								org.needs.push(newNeed.id);
+								//Save the need and the organization
+								newNeed.save();
+								org.save();
+
+								req.flash('success_msg', 'Need was successfully created.');
+								res.redirect('/org/' + org.shortPath + '/needs');
+							}
+						});
+
+					
+					}
+				});
+
 			} else {
 				res.redirect('/org/' + org.shortPath);
 			}
@@ -192,7 +275,7 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 				req.assert('secondaryColor', 'There was an issue with the primary color.').isLength(6, 6);
 				req.assert('secondaryColor', 'There was an issue with the primary color.').matches(/^[a-fA-F0-9]*$/g);
 				req.assert('welcomeText', 'Welcome text should be 200-400 characters.').isLength(200,400);
-				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(200,400);				
+				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(200,400);			
 
 				req.getValidationResult().then(function(result){
 
@@ -216,7 +299,6 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 
 						//Logo
 						if (req.files.logo){
-							console.log(req.files.logo);
 							var logo = {
 						 		fileName: req.files.logo[0].filename,
 								originalName: req.files.logo[0].originalname						
@@ -243,6 +325,81 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 			next();
 		}
 	
+	});
+});
+
+/* GET and POST to departments */
+router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
+					title: org.name, 
+					org: org, 
+					pageHeader: 'Departments', 
+					isAdmin: true, 
+					isSubscriber: true,
+				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}	
+	});
+});
+
+router.post('/:name/departments', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+
+				var departmentName = req.body.departmentName;
+
+				req.assert('departmentName', 'The department name is required.').notEmpty();
+				req.assert('departmentName', 'The department name should be no more than 50 characters.').isLength(0, 50);
+
+				req.getValidationResult().then(function(result){
+					if (!result.isEmpty()){
+						res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
+							title: org.name, 
+							org: org, 
+							pageHeader: 'Departments', 
+							isAdmin: true,
+							isSubscriber: true,
+							errors: result.useFirstErrorOnly().array(),	
+						});						
+					} else {
+						//Create the department
+						var newDepartment = new Department({
+							departmentName: departmentName,
+						});
+
+						//The org admin is an advocate for the General department
+						newDepartment.advocates.push(req.user.id);
+
+						//Push the new department to the organization
+						org.departments.push(newDepartment);
+
+						//Save the department
+						newDepartment.save();
+
+						//Save the organization
+						org.save();
+
+						req.flash('success_msg', 'Department was successfully created.');
+						res.redirect('/org/' + org.shortPath + '/departments');					
+					}
+				});
+
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}	
 	});
 });
 

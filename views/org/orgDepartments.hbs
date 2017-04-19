@@ -1,0 +1,52 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+<div class="row">
+    {{#if org}}
+        {{#each org.departments}}
+            <div class="col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title">{{this.departmentName}}</h1>
+                    </div>
+                    <div class="panel-body">
+                        <div style="text-align:center;" class="col-xs-12"><strong>Advocates</strong></div>
+                        <ul class="list-group">
+                            {{#each this.advocates}}
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        <div style="text-align: center;">
+                                            {{#if this.avatar}}
+                                                <img src="/uploads/{{this.avatar.fileName}}" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>
+                                            {{else}}
+                                                <img src="/images/no-avatar.png" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>		
+                                            {{/if}}
+                                        </div>
+                                        <div style="text-align: center;">{{this.firstName}} {{this.lastName}}</div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+    {{/if}}
+</div>
+<hr>
+<div class="row">
+    <form method="POST" id="newDepartmentForm">
+        <div class="col-xs-4">
+            <input type="text" placeholder="Department name" id="departmentName" name="departmentName" class="form-control" />
+        </div>
+        <div class="col-xs-3">
+            <button type="submit" class="btn">Add Department</button>
+        </div>
+    </form>
+</div>
