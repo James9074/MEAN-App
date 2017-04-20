@@ -334,13 +334,33 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 		if (err) throw err;
 		if (org){
 			if (isAdmin(org, req.user)) {
-				res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Departments', 
-					isAdmin: true, 
-					isSubscriber: true,
-				});
+				
+				if (req.query.delete){
+					//Delete department
+					Department.findOne({"$and": [{organization: org.id}, {_id: req.query.delete}]}).exec(function(err, dept){
+						if (err) throw err;
+						
+						if (dept){
+							//Remove the department from organization
+							org.departments.pull({_id: dept.id});
+							org.save();
+							//Delete the department
+							dept.remove();
+							req.flash('success_msg', 'The department was removed.');
+						} else {
+							req.flash('error', 'There was an error processing the request.');
+						}
+						res.redirect('/org/' + org.shortPath + '/departments');
+					});
+				} else {
+					res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
+						title: org.name, 
+						org: org, 
+						pageHeader: 'Departments', 
+						isAdmin: true, 
+						isSubscriber: true,
+					});
+				}
 			} else {
 				res.redirect('/org/' + org.shortPath);
 			}
@@ -374,6 +394,7 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 					} else {
 						//Create the department
 						var newDepartment = new Department({
+							organization: org.id,
 							departmentName: departmentName,
 						});
 

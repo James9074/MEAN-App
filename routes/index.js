@@ -244,6 +244,7 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 
 			//Create the General department
 			var newDepartment = new Department({
+				organization: newOrganization.id,
 				departmentName: 'General',
 			});
 
