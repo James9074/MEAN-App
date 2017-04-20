@@ -50,6 +50,15 @@ var isSubscriber = function(org, user) {
 	return (user && (user.subscriptions.indexOf(org.id) >= 0));
 }
 
+var isAdvocateOfNeed = function(need, user) {
+	if  (need.department.advocates.indexOf(user.id) == -1) return false;
+	return true;
+}
+
+var isAdvocateofDepartment = function(dept, user) {
+	return true;
+}
+
 /* GET home page. */
 router.get('/:name', function(req, res, next) {
 
@@ -99,6 +108,7 @@ router.get('/:name/needs', function(req, res, next) {
 		if (err) throw err;
 		if (org){
 			res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
+				user: req.user,
 				title: org.name, 
 				org: org, 
 				pageHeader: 'Needs', 
@@ -120,7 +130,8 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 		if (err) throw err;
 		if (org){
 			if (isAdmin(org, req.user)) {
-				res.render('org/orgAddNeed', {layout: 'layouts/orgLayout',
+				res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
+					user: req.user,
 					title: org.name, 
 					org: org, 
 					pageHeader: 'Add Need', 
@@ -162,7 +173,7 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
 				req.getValidationResult().then(function(result){
 					if (!result.isEmpty()){
-						res.render('org/orgAddNeed', {layout: 'layouts/orgLayout',
+						res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 							title: org.name, 
 							org: org, 
 							pageHeader: 'Add Need', 
@@ -232,6 +243,141 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 		}
 	});	
 
+});
+
+/* GET and POST to needs/edit */
+router.get('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			//Find the need
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+				if (err) throw err;
+				if (need){
+					if (isAdvocateOfNeed(need, req.user)) {
+						res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
+							user: req.user,
+							title: org.name, 
+							org: org, 
+							pageHeader: 'Edit Need', 
+							isAdmin: isAdmin(org, req.user), 
+							isSubscriber: isSubscriber(org, req.user),
+							need: need,
+						});
+					} else {
+						res.redirect('/org/' + org.shortPath + '/needs');
+					}
+				} else {
+					next();
+				}
+			});
+
+		} else {
+			next();
+		}
+
+	});
+});
+
+router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			//Find the need
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+				if (err) throw err;
+				if (need){
+					if (isAdvocateOfNeed(need, req.user)) {
+
+						//Update need
+						var needTitle = req.body.needTitle;
+						var amount = req.body.amount;
+						var needType = req.body.needType;
+						var department = req.body.department;
+						var needDate = req.body.needDate;
+						var description = req.body.description;
+
+						//Validation
+						req.assert('needTitle', 'Need title is a required field.').notEmpty();
+						req.assert('amount', 'Quantity or Amount must be a positive number').isInt({min: 0});
+						req.assert('needType', 'Need type is a required field').notEmpty();
+						req.assert('department', 'Department is a required field.').notEmpty();
+						req.assert('needDate', 'Needed by must be a valid date.').isDate();
+						req.assert('needDate', 'Needed by must be a date later than today.').isAfter();
+						req.assert('discription', 'Description must be no more than 400 characters.').isLength(0,400);
+
+						req.getValidationResult().then(function(result){
+							if (!result.isEmpty()){
+								res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
+									title: org.name, 
+									org: org, 
+									pageHeader: 'Edit Need', 
+									isAdmin: isAdmin(org, req.user), 
+									isSubscriber: isSubscriber(org, req.user),
+									need: need,
+									errors: result.useFirstErrorOnly().array(),	
+								});						
+							} else {
+								//Make sure that the specified department exists and has the user listed as advocate
+								var deptArray = []; //The list of depts the user is an advocate for
+								var orgDepts = []; //The list of depts in the organization
+
+								Department.find({advocates: req.user.id}, function (err, depts) {
+									if (err){
+										return done(err);
+									}
+
+									depts.forEach(function(val){
+										deptArray.push(val.id);
+									});
+
+									//Now we need to generate an array of departments ACTUALLY in the organization
+									org.departments.forEach(function(dept){
+										orgDepts.push(dept.id);
+									});
+
+									//If either condition is false, the form must fail.
+									if ((deptArray.indexOf(department) == -1) || (orgDepts.indexOf(department) == -1)){
+
+										req.flash('error', 'An error occurred while processing the request.');
+										res.redirect('/org/' + org.shortPath + '/needs/new');
+									}
+									else{
+										//Update need
+
+										need.title = needTitle;
+										need.description = description;
+										need.goalAmount = amount;
+										need.needType = needType;
+										need.department = department;
+										need.needDate = needDate;
+										
+										//Save the need and the organization
+										need.save();
+
+										req.flash('success_msg', 'Need was successfully updated.');
+										res.redirect('/org/' + org.shortPath + '/needs');
+									}
+								});
+							
+							}
+						});
+
+					} else {
+						res.redirect('/org/' + org.shortPath + '/needs');
+					}
+				} else {
+					next();
+				}
+			});
+
+		} else {
+			next();
+		}
+
+	});
 });
 
 /* GET and POST theme settings. */

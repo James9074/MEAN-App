@@ -94,6 +94,7 @@ app.use(function(err, req, res, next) {
 
 //Handlebars helpers
 Handlebars.registerHelper('formatTime', function (date, format) {
+    if (!date) return "";
     var mmnt = moment(date);
     return mmnt.format(format);
 });
@@ -105,5 +106,27 @@ Handlebars.registerHelper('calcProgress', function (currentAmount, goalAmount) {
 
 Handlebars.registerHelper('isMonetary', function (needType) {
     return (needType == "monetary") ? "$" : "";
+});
+
+Handlebars.registerHelper('selected', function(option, value){
+    if (option === value) {
+        return ' selected';
+    } else {
+        return ''
+    }
+});
+
+Handlebars.registerHelper("isAdvocateOfNeed", function(need, user) {
+  if (!need) return false;
+  if (!user) return false;
+  if  (need.department.advocates.indexOf(user.id) == -1) return false;
+  return true;
+});
+
+Handlebars.registerHelper("isAdvocateOfDepartment", function(dept, user) {
+  if (!dept) return false;
+  if (!user) return false;
+  if  (dept.advocates.indexOf(user.id) == -1) return false;
+  return true;
 });
 module.exports = app;

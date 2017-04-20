@@ -19,7 +19,7 @@ var needSchema = mongoose.Schema({
 	},
 	description: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	goalAmount: { //The goal amount
 		type: Number,
