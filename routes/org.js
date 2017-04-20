@@ -95,7 +95,7 @@ router.get('/:name/subscribe', ensureAuthenticated, function (req, res, next){
 /* GET needs. */
 router.get('/:name/needs', function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
 			res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
@@ -105,6 +105,7 @@ router.get('/:name/needs', function(req, res, next) {
 				isAdmin: isAdmin(org, req.user), 
 				isSubscriber: isSubscriber(org, req.user),
 				activeMenuItem: 'needsMenuItem',
+				needs: org.needs,
 			});
 		} else {
 			next();
@@ -203,7 +204,6 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 									description: description,
 									goalAmount: amount,
 									currentAmount: 0,
-									progress: 0,
 									needType: needType,
 									department: department,
 									needDate: needDate,

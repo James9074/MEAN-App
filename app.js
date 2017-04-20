@@ -12,6 +12,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var session = require('express-session');
 var multer = require('multer');
+var Handlebars = require('hbs');
 
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -91,4 +92,18 @@ app.use(function(err, req, res, next) {
   res.render('error', {layout: 'layouts/layout'});
 });
 
+//Handlebars helpers
+Handlebars.registerHelper('formatTime', function (date, format) {
+    var mmnt = moment(date);
+    return mmnt.format(format);
+});
+
+Handlebars.registerHelper('calcProgress', function (currentAmount, goalAmount) {
+    if (goalAmount == 0) return 100;
+    return ((currentAmount / goalAmount) * 10);
+});
+
+Handlebars.registerHelper('isMonetary', function (needType) {
+    return (needType == "monetary") ? "$" : "";
+});
 module.exports = app;

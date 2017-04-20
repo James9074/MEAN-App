@@ -31,12 +31,6 @@ var needSchema = mongoose.Schema({
 		min: 0,
 		required: false,
 	},
-	progress: {
-		type: Number,
-		min: 0,
-		max: 100,
-		required: false,
-	},
 	needType: {
 		type: String,
 		enum: ['monetary','non-monetary'],
