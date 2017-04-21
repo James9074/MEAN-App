@@ -81,6 +81,14 @@ router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), funct
 			fileName: req.file.filename,
 			originalName: req.file.originalname
 		}
+
+		//Remove old avatar from disk if there is one
+		if (req.user.avatar){
+			var fs = require('fs');
+			var filePath = './public/uploads/' + req.user.avatar.fileName; 
+			fs.unlinkSync(filePath);
+		}
+
 		req.user.avatar = avatar;
 		req.user.save();
 	} else {
