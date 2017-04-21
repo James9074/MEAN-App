@@ -1,8 +1,27 @@
 <div class="row margin-bottom">
 	<div class="col-xs-1"></div>
-	<div class="col-xs-10" id="needsFilter">
-		Needs Filter
-	</div>
+	<form method="GET" id="filterNeedsForm">
+		<div class="col-xs-10" id="needsFilter">
+			<div class="col-xs-3">
+				<input class="form-control" type="text" id="search" name="search" placeholder="Search"/>
+			</div>
+			<div class="col-xs-3">
+				<select class="form-control" name="department" id="department">
+					<option value="">All departments</option>
+					{{#each org.departments}}
+						<option value="{{this.departmentName}}">{{this.departmentName}}</option>
+					{{/each}}
+				</select>
+			</div>
+			<div class="col-xs-3">
+				<select class="form-control" name="sortBy" id="sortBy">
+					<option value="newest">Newest first</option>
+					<option value="oldest">Oldest first</option>
+				</select>
+			</div>
+			<div class="col-xs-3"><button type="submit" class="btn">Filter Needs</button></div>
+		</div>
+	</form>
 	<div class="col-xs-1"></div>
 </div>
 
@@ -50,7 +69,7 @@
 			</div>
 			<div class="col-xs-12">
 				{{#if (isAdvocateOfNeed this ../user)}}
-					<a type="button" class="btn" href="/org/{{../org.shortPath}}/needs/edit/{{this.id}}">Edit need</a>
+					<a type="button" class="btn alt-btn" href="/org/{{../org.shortPath}}/needs/edit/{{this.id}}">Edit need</a>
 				{{/if}}
 			</div>
 		</div>

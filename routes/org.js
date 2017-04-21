@@ -1,4 +1,5 @@
 var express = require('express');
+var _ = require('lodash');
 var router = express.Router();
 var Organization = require('../models/organization');
 var Department = require('../models/department');
@@ -104,9 +105,28 @@ router.get('/:name/subscribe', ensureAuthenticated, function (req, res, next){
 /* GET needs. */
 router.get('/:name/needs', function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
+
+			var needs = org.needs;
+
+			//Filter by department
+			if(req.query.department){
+				needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
+			}
+
+			//Filter by search term
+			if (req.query.search){
+				needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
+			}
+
+			//Sort
+			if (req.query.sortBy){
+				needs = _.sortBy(needs, "createdAt");
+				if (req.query.sortBy == "oldest") needs.reverse();
+			}
+
 			res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
 				user: req.user,
 				title: org.name, 
@@ -115,7 +135,7 @@ router.get('/:name/needs', function(req, res, next) {
 				isAdmin: isAdmin(org, req.user), 
 				isSubscriber: isSubscriber(org, req.user),
 				activeMenuItem: 'needsMenuItem',
-				needs: org.needs,
+				needs: needs,
 			});
 		} else {
 			next();

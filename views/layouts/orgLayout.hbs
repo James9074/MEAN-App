@@ -24,7 +24,7 @@
 		<div class="col-xs-1"></div>
 		<div class="col-xs-2" style="margin-top:30px;">
 			{{#if isAdmin}}
-				<button type="button" class="btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
+				<button type="button" class="btn alt-btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
 				<ul class="dropdown-menu">
 					<li><a href="/org/{{org.shortPath}}/theme">Theme Settings</a></li>
 					<li><a href="/org/{{org.shortPath}}/departments">Departments</a></li>
@@ -33,7 +33,7 @@
 			{{/if}}
 
 			{{#unless isSubscriber}}
-				<a type="button" class="btn" href="/org/{{org.shortPath}}/subscribe">Subscribe</span></a>
+				<a type="button" class="btn alt-btn" href="/org/{{org.shortPath}}/subscribe">Subscribe</span></a>
 			{{/unless}}
 		</div>
 	</div>
@@ -131,6 +131,11 @@
 		color: #fff;
 		background-color: {{org.secondaryColor}};
 		outline: none;
+	}
+	.alt-btn, .alt-btn:hover, .alt-btn:focus, .alt-btn:active {
+		color: #fff;
+		background-color: {{org.primaryColor}};
+		outline: none;		
 	}
 	.prgrs {
 		background-color: {{org.primaryColor}}
