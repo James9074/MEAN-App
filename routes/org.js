@@ -421,7 +421,7 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 				req.assert('secondaryColor', 'There was an issue with the primary color.').isLength(6, 6);
 				req.assert('secondaryColor', 'There was an issue with the primary color.').matches(/^[a-fA-F0-9]*$/g);
 				req.assert('welcomeText', 'Welcome text should be 200-400 characters.').isLength(200,400);
-				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(200,400);			
+				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(150,350);			
 
 				req.getValidationResult().then(function(result){
 
@@ -459,6 +459,11 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 							}
 							org.welcomeImage = welcomeImage;
 						}
+
+						//Welcome and Thank you text
+						org.welcomeText = welcomeText;
+						org.thankYouText = thankYouText;
+
 						org.save();
 						req.flash('success_msg', 'Theme settings updated.')
 						res.redirect('/org/' + org.shortPath + '/theme');
