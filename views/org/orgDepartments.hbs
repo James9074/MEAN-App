@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div style="text-align:center;" class="col-xs-12"><strong>Advocates</strong></div>
+                        <div style="text-align:center;" class="col-xs-12 margin-bottom"><strong>Advocates</strong></div>
                         <div class="margin-bottom">
                             {{#each this.advocates}}
                                 <div class="col-xs-4">
@@ -31,6 +31,9 @@
                                         {{/if}}
                                     </div>
                                     <div style="text-align: center;">{{this.firstName}} {{this.lastName}}</div>
+                                    <div style="text-align: center;">
+                                        {{#if @index}}<a href="?removeAdv={{this.id}}&dept={{../this.id}}">Remove</a>{{/if}}
+                                    </div>
                                 </div>
                             {{/each}}
                         </div>

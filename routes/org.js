@@ -175,8 +175,8 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 					title: org.name, 
 					org: org, 
 					pageHeader: 'Add Need', 
-					isAdmin: true, 
-					isSubscriber: true,
+					isAdmin: isAdmin(org, req.user), 
+					isSubscriber: isSubscriber(org, req.user),
 				});
 			} else {
 				res.redirect('/org/' + org.shortPath);
@@ -217,8 +217,8 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 							title: org.name, 
 							org: org, 
 							pageHeader: 'Add Need', 
-							isAdmin: true,
-							isSubscriber: true,
+							isAdmin: isAdmin(org, req.user),
+							isSubscriber: isSubscriber(org, req.user),
 							errors: result.useFirstErrorOnly().array(),	
 						});						
 					} else {
@@ -525,8 +525,22 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 		if (err) throw err;
 		if (org){
 			if (isAdmin(org, req.user)) {
-				
-				if (req.query.delete){
+				if (req.query.removeAdv && req.query.dept){
+					Department.findOne({"$and": [{organization: org.id}, {_id: req.query.dept}]}).exec(function(err, dept){ //Get the department and make sure we own it
+						if (err) throw err;
+						if (req.query.removeAdv == req.user.id) dept = false; //Cannot remove the admin from a department
+						if (dept){
+							//Remove the advocate from department
+							dept.advocates.pull({_id: req.query.removeAdv});
+							dept.save();
+							//Delete the department
+							req.flash('success_msg', 'The advocate was removed.');
+						} else {
+							req.flash('error', 'There was an error processing the request.');
+						}
+						res.redirect('/org/' + org.shortPath + '/departments');
+					});					
+				} else if (req.query.delete){
 
 					//Make sure there are no needs under this department
 					Need.findOne({department: req.query.delete}).exec(function(err, need){
