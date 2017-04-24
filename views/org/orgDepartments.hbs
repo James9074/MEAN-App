@@ -15,27 +15,36 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-9"><h1 class="panel-title">{{this.departmentName}}</h1></div>
-                            <div class="col-xs-3"><a href="?delete={{this.id}}" onclick="return confirm('Are you sure?')">Remove</a></div>
+                            {{#if @index}}<div class="col-xs-3"><a href="?delete={{this.id}}" onclick="return confirm('Are you sure?')">Remove</a></div>{{/if}}
                         </div>
                     </div>
                     <div class="panel-body">
                         <div style="text-align:center;" class="col-xs-12"><strong>Advocates</strong></div>
-                        <ul class="list-group">
+                        <div class="margin-bottom">
                             {{#each this.advocates}}
-                                <div class="row">
-                                    <div class="col-xs-4">
-                                        <div style="text-align: center;">
-                                            {{#if this.avatar}}
-                                                <img src="/uploads/{{this.avatar.fileName}}" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>
-                                            {{else}}
-                                                <img src="/images/no-avatar.png" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>		
-                                            {{/if}}
-                                        </div>
-                                        <div style="text-align: center;">{{this.firstName}} {{this.lastName}}</div>
+                                <div class="col-xs-4">
+                                    <div style="text-align: center;">
+                                        {{#if this.avatar}}
+                                            <img src="/uploads/{{this.avatar.fileName}}" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>
+                                        {{else}}
+                                            <img src="/images/no-avatar.png" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>		
+                                        {{/if}}
                                     </div>
+                                    <div style="text-align: center;">{{this.firstName}} {{this.lastName}}</div>
                                 </div>
                             {{/each}}
-                        </ul>
+                        </div>
+                        <div class="row">
+                            <form method="POST" id="addAdvocateForm">
+                                <div class="col-xs-8 margin-top">
+                                    <input type="hidden" name="deptId" id="deptId" value="{{this.id}}"/>
+                                    <input class="form-control" type="text" placeholder="Add advocate by email" name="advocateEmail" />
+                                </div>
+                                <div class="col-xs-4 margin-top">
+                                    <button type="submit" class="btn">Add Advocate</button>    
+                                </div>    
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

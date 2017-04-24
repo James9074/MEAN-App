@@ -52,12 +52,31 @@ var isSubscriber = function(org, user) {
 }
 
 var isAdvocateOfNeed = function(need, user) {
+	if (!user) return false;
 	if  (need.department.advocates.indexOf(user.id) == -1) return false;
 	return true;
 }
 
-var isAdvocateofDepartment = function(dept, user) {
-	return true;
+var isAdvocateforOrg = function (org, user) {
+	if (!user) return false;
+	var depts = _.filter(org.departments, function(o){ return (o.advocates.indexOf(user.id) != -1)});
+	if (depts.length > 0) return true;
+	return false;
+}
+
+var isAdvocateforOrgPopped = function (org, user) { //Only if the advocates have been populated
+	if (!user) return false;
+
+	var depts = _.filter(org.departments, function(o){
+	
+		var adv = _.filter(o.advocates, function(u){
+			return (u.id == user.id); 
+		})
+		 return (adv.length > 0);
+	});
+
+	if (depts.length > 0) return true;
+	return false;
 }
 
 /* GET home page. */
@@ -134,6 +153,7 @@ router.get('/:name/needs', function(req, res, next) {
 				pageHeader: 'Needs', 
 				isAdmin: isAdmin(org, req.user), 
 				isSubscriber: isSubscriber(org, req.user),
+				isAdvocate: isAdvocateforOrg(org, req.user),
 				activeMenuItem: 'needsMenuItem',
 				needs: needs,
 			});
@@ -149,7 +169,7 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			if (isAdmin(org, req.user)) {
+			if (isAdvocateforOrg(org, req.user)) {
 				res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 					user: req.user,
 					title: org.name, 
@@ -172,7 +192,7 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			if (isAdmin(org, req.user)) {
+			if (isAdvocateforOrgPopped(org, req.user)) {
 
 				//Create need
 				var needTitle = req.body.needTitle;
@@ -507,22 +527,31 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 			if (isAdmin(org, req.user)) {
 				
 				if (req.query.delete){
-					//Delete department
-					Department.findOne({"$and": [{organization: org.id}, {_id: req.query.delete}]}).exec(function(err, dept){
-						if (err) throw err;
-						
-						if (dept){
-							//Remove the department from organization
-							org.departments.pull({_id: dept.id});
-							org.save();
-							//Delete the department
-							dept.remove();
-							req.flash('success_msg', 'The department was removed.');
+
+					//Make sure there are no needs under this department
+					Need.findOne({department: req.query.delete}).exec(function(err, need){
+						if (!need) {
+							//Delete department
+							Department.findOne({"$and": [{organization: org.id}, {_id: req.query.delete}]}).exec(function(err, dept){
+								if (err) throw err;
+								if (dept.id == org.departments[0].id) dept = false; //Cannot delete the General department
+								if (dept){
+									//Remove the department from organization
+									org.departments.pull({_id: dept.id});
+									org.save();
+									//Delete the department
+									dept.remove();
+									req.flash('success_msg', 'The department was removed.');
+								} else {
+									req.flash('error', 'There was an error processing the request.');
+								}
+								res.redirect('/org/' + org.shortPath + '/departments');
+							});
 						} else {
-							req.flash('error', 'There was an error processing the request.');
+							req.flash('error', 'A department may not be removed while there are still needs associated with it.');
+							res.redirect('/org/' + org.shortPath + '/departments');
 						}
-						res.redirect('/org/' + org.shortPath + '/departments');
-					});
+					})
 				} else {
 					res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
 						title: org.name, 
@@ -547,45 +576,99 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 		if (org){
 			if (isAdmin(org, req.user)) {
 
-				var departmentName = req.body.departmentName;
+				//If deptId exists, the add advocate form was submitted, instead of the new department form
+				if (req.body.deptId) {
+					var advocateEmail = req.body.advocateEmail;
 
-				req.assert('departmentName', 'The department name is required.').notEmpty();
-				req.assert('departmentName', 'The department name should be no more than 50 characters.').isLength(0, 50);
+					req.assert('advocateEmail', 'You did not enter a valid email address').isEmail();
 
-				req.getValidationResult().then(function(result){
-					if (!result.isEmpty()){
-						res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
-							title: org.name, 
-							org: org, 
-							pageHeader: 'Departments', 
-							isAdmin: true,
-							isSubscriber: true,
-							errors: result.useFirstErrorOnly().array(),	
-						});						
-					} else {
-						//Create the department
-						var newDepartment = new Department({
-							organization: org.id,
-							departmentName: departmentName,
-						});
+					req.getValidationResult().then(function(result){
+						if (!result.isEmpty()){
+							res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
+								title: org.name, 
+								org: org, 
+								pageHeader: 'Departments', 
+								isAdmin: true,
+								isSubscriber: true,
+								errors: result.useFirstErrorOnly().array(),	
+							});	
+						} else {
+							var dept = _.filter(org.departments, function(o){ return (o.id == req.body.deptId)});
 
-						//The org admin is an advocate for the General department
-						newDepartment.advocates.push(req.user.id);
+							//Make sure we've gotten a result (The department must be in the orgs list of departments)
+							if (dept.length == 1) {
+								//Now let's make sure the email doesn't exist in the list of advocates
+								var advocate = _.filter(dept[0].advocates, function(o){ return (o.email.toLowerCase() == req.body.advocateEmail.toLowerCase())});
 
-						//Push the new department to the organization
-						org.departments.push(newDepartment);
+								if (advocate.length > 0) {
+									//The advocate already exists
+									req.flash('error', 'The specified advocate already exists for this department.');
+									res.redirect('/org/' + org.shortPath + '/departments');										
+								} else {
 
-						//Save the department
-						newDepartment.save();
+									User.findOne({email: req.body.advocateEmail.toLowerCase()}).exec(function(err, user){
+										if (err) throw err;
 
-						//Save the organization
-						org.save();
+										if (user) {
+											//Add the advocate to the department and save the department
+											dept[0].advocates.push(user.id);
+											dept[0].save();
+											req.flash('success_msg', 'The advocate was successfully added.');
+											res.redirect('/org/' + org.shortPath + '/departments');	
+										} else {
+											req.flash('error', 'A user with that email address does not exist. Make sure the user has a FaihByDeeds account.');
+											res.redirect('/org/' + org.shortPath + '/departments');	
+										}
 
-						req.flash('success_msg', 'Department was successfully created.');
-						res.redirect('/org/' + org.shortPath + '/departments');					
-					}
-				});
+									});
+								}							
+							} else {
+								req.flash('error', 'There was a problem processing the request');
+								res.redirect('/org/' + org.shortPath + '/departments');	
+							}
+						}
+					});
 
+				} else {
+					var departmentName = req.body.departmentName;
+
+					req.assert('departmentName', 'The department name is required.').notEmpty();
+					req.assert('departmentName', 'The department name should be no more than 50 characters.').isLength(0, 50);
+
+					req.getValidationResult().then(function(result){
+						if (!result.isEmpty()){
+							res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
+								title: org.name, 
+								org: org, 
+								pageHeader: 'Departments', 
+								isAdmin: true,
+								isSubscriber: true,
+								errors: result.useFirstErrorOnly().array(),	
+							});						
+						} else {
+							//Create the department
+							var newDepartment = new Department({
+								organization: org.id,
+								departmentName: departmentName,
+							});
+
+							//The org admin is an advocate for the General department
+							newDepartment.advocates.push(req.user.id);
+
+							//Push the new department to the organization
+							org.departments.push(newDepartment);
+
+							//Save the department
+							newDepartment.save();
+
+							//Save the organization
+							org.save();
+
+							req.flash('success_msg', 'Department was successfully created.');
+							res.redirect('/org/' + org.shortPath + '/departments');					
+						}
+					});
+				}
 			} else {
 				res.redirect('/org/' + org.shortPath);
 			}
