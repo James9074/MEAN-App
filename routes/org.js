@@ -551,10 +551,9 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 /* GET needs success and failure */
 router.get('/:name/needs/success', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			console.log(req.body);
 			req.flash('success_msg', 'The need will be updated once the payment has been processed.');
 			res.redirect('/org/' + org.shortPath + '/needs');
 		} else {
@@ -565,12 +564,25 @@ router.get('/:name/needs/success', ensureAuthenticated, function(req, res, next)
 
 router.get('/:name/needs/failure', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			req.flash('error', 'A problem occurred during the payment process.');
+			res.redirect('/org/' + org.shortPath + '/needs');
+		} else {
+			next();
+		}
+	});
+});
+
+/* This route exists to make sure payments were processed, and to create the monetary contribution as a response */
+router.get('/:name/needs/IPNhandler', function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
 			console.log(req.body);
-			req.flash('error', 'A problem occurred during the payment process.');
-			res.redirect('/org/' + org.shortPath + '/needs');
+			res.send('Thanks Paypal! \'ppreciate it!');
 		} else {
 			next();
 		}
