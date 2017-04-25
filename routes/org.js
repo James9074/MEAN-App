@@ -305,6 +305,7 @@ router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, r
 							isSubscriber: isSubscriber(org, req.user),
 							monetaryNeed: (need.needType == "monetary"),
 							need: need,
+							fullURL: req.protocol + '://' + req.get('host') + req.originalUrl,
 						});
 					} else {
 						res.redirect('/org/' + org.shortPath + '/needs');
@@ -370,25 +371,30 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									errors: result.useFirstErrorOnly().array(),	
 								});						
 							} else {
-								var newContribution = new Contribution({
-									contributor: req.user.id,
-									need: need.id,
-									organization: org.id,
-									contributionAmount: donationAmount,
-									comments: comments,
-									status: 'pending',
-								});
+								//If monetary, we redirect this to paypal.com
+								if (need.needType == 'monetary'){
+									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr');
+								} else {
+									var newContribution = new Contribution({
+										contributor: req.user.id,
+										need: need.id,
+										organization: org.id,
+										contributionAmount: donationAmount,
+										comments: comments,
+										status: 'pending',
+									});
 
-								if (publicName) newContribution.publicName = publicName;
-								if (pledgeDate) newContribution.pledgeDate = pledgeDate;
+									if (publicName) newContribution.publicName = publicName;
+									if (pledgeDate) newContribution.pledgeDate = pledgeDate;
 
-								newContribution.save();
-								need.contributions.push(newContribution.id);
-								need.currentAmount += newContribution.contributionAmount;
-								need.save();
+									newContribution.save();
+									need.contributions.push(newContribution.id);
+									need.currentAmount += newContribution.contributionAmount;
+									need.save();
 
-								req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
-								res.redirect('/org/' + org.shortPath + '/needs');
+									req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
+									res.redirect('/org/' + org.shortPath + '/needs');
+								}
 							}
 						});
 
@@ -539,6 +545,35 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 			next();
 		}
 
+	});
+});
+
+/* GET needs success and failure */
+router.get('/:name/needs/success', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			console.log(req.body);
+			req.flash('success_msg', 'The need will be updated once the payment has been processed.');
+			res.redirect('/org/' + org.shortPath + '/needs');
+		} else {
+			next();
+		}
+	});
+});
+
+router.get('/:name/needs/failure', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			console.log(req.body);
+			req.flash('error', 'A problem occurred during the payment process.');
+			res.redirect('/org/' + org.shortPath + '/needs');
+		} else {
+			next();
+		}
 	});
 });
 

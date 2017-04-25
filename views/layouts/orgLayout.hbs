@@ -72,6 +72,7 @@
 			num = '$' + num;
 			if (num == '$NaN') num = 'Invalid';
 			$('#' + div2).html(num);
+			$('#ppAmount').val(num.substring(1));
 		}
 		
 		$(document).ready(function(){
