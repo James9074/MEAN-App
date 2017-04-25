@@ -1,0 +1,77 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}} to "{{need.title}}"</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+	<div class="row">
+        <form id="contributionForm" method="POST">
+            <div class="col-xs-6">
+                <div class="form-group row">
+                    <div class="col-xs-5">
+                        <label for="donationAmount">Donation:</label>
+                    </div>
+                    <div class="col-xs-7">
+                        {{#if monetaryNeed}}
+                            <input class="form-control" id="donationAmount" name="donationAmount" type="text" onchange="setTotal('donationAmount', 'totalAmount');">
+                        {{else}}
+                            <input class="form-control" id="donationAmount" name="donationAmount" type="text">
+                        {{/if}}
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-5">
+                        <label for="comments">Notes/Comments:</label>
+                    </div>
+                    <div class="col-xs-7">
+                        <textarea class="form-control" id="comments" name="comments" rows="4" maxlength="400"></textarea>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-5">
+                        <label for="publicName">Contribute As: <a data-toggle="tooltip" title="This name will be displayed in the 'Thank You' section. Leave blank to submit anonymously.">?</a></label>
+                    </div>
+                    <div class="col-xs-7">
+                        <input class="form-control" id="publicName" name="publicName" type="text" value="{{user.firstName}}">
+                    </div>
+                </div>
+                {{#unless monetaryNeed}}
+                    <div class="form-group row">
+                        <div class="col-xs-5">
+                            <label for="deliveryDate">Delivery estimate:</label>
+                        </div>
+                        <div class="col-xs-7">
+                            <input class="form-control datepicker" id="pledgeDate" type="text" name="pledgeDate" />
+                        </div>
+                    </div>
+                {{/unless}}
+                <div class="form-group row">
+                    {{#if monetaryNeed}}
+                        <div class="col-xs-12 margin-bottom">
+                            <strong>Total: <span id="totalAmount"></span></strong>
+                        </div>
+                    {{/if}}
+                    <div class="col-xs-12">
+                        <input type="submit" class="btn" value="Submit"/>
+                    </div>
+                </div>
+            </div>
+        </form>
+		<div class="col-xs-6" style="border-left: solid 1px #eee;height:350px;">
+			<div class="row">
+				<div class="col-xs-12">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Need: </strong>{{need.title}}</li>
+                        <li class="list-group-item"><strong>Goal: </strong>{{need.goalAmount}}</li>
+                        <li class="list-group-item"><strong>Contributed: </strong>{{need.currentAmount}}</li>
+                        <li class="list-group-item"><strong>Needed by: </strong>{{formatTime need.needDate "MMM DD, YYYY"}}</li>
+                        <li class="list-group-item"><strong>Department: </strong>{{need.department.departmentName}}</li>
+                        <li class="list-group-item"><strong>Description: </strong>{{need.description}}</li>
+                    </ul>
+				</div>
+			</div>
+		</div>
+	</div>

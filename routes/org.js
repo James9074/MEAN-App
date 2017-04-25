@@ -5,6 +5,7 @@ var Organization = require('../models/organization');
 var Department = require('../models/department');
 var Need = require('../models/need');
 var User = require('../models/user');
+var Contribution = require('../models/contribution');
 var multer = require('multer');
 var path = require('path');
 var crypto = require('crypto');
@@ -271,7 +272,6 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 							}
 						});
 
-					
 					}
 				});
 
@@ -283,6 +283,128 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 		}
 	});	
 
+});
+
+/* GET and POST to needs/contribute */
+router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			//Find the need
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+				if (err) throw err;
+				if (need){
+					if (isSubscriber(org, req.user)) {
+						res.render('org/orgContribute', {layout: 'layouts/orgLayout',
+							user: req.user,
+							title: org.name, 
+							org: org, 
+							pageHeader: 'Contribute', 
+							isAdmin: isAdmin(org, req.user), 
+							isSubscriber: isSubscriber(org, req.user),
+							monetaryNeed: (need.needType == "monetary"),
+							need: need,
+						});
+					} else {
+						res.redirect('/org/' + org.shortPath + '/needs');
+					}
+				} else {
+					next();
+				}
+			});
+
+		} else {
+			next();
+		}
+
+	});
+});
+
+router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			//Find the need
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+				if (err) throw err;
+				if (need){
+					if (isSubscriber(org, req.user)) {
+						
+						//Grab req.body variables
+						var donationAmount = req.body.donationAmount;
+						var comments = req.body.comments;
+						var publicName = req.body.publicName;
+
+						if (need.needType == "monetary") {
+							donationAmount = parseFloat(donationAmount).toFixed(2);
+						} else {
+							donationAmount = Math.trunc(donationAmount);
+							var pledgeDate = req.body.pledgeDate;
+						}
+
+						//Form validation
+						req.assert('donationAmount', 'The donation amount is required.').notEmpty();
+						req.assert('donationAmount', 'The donation amount must be a number.').isFloat();
+						req.assert('comments', 'The comments field should be no more than 400 characters.').isLength(0, 400);
+						req.assert('publicName', 'The contribute as name must be no more than 50 characters.').isLength(0, 50);
+						
+						if (!(need.needType == "monetary")) {
+							req.assert('pledgeDate', 'The delivery estimate is required.').notEmpty();							
+							req.assert('pledgeDate', 'The delivery estimate must be a valid date.').isDate();
+							req.assert('pledgeDate', 'The delivery estimate must be later than today.').isAfter();
+						}
+
+						req.getValidationResult().then(function(result){
+							if (!result.isEmpty()){
+								res.render('org/orgContribute', {layout: 'layouts/orgLayout',
+									user: req.user,
+									title: org.name, 
+									org: org, 
+									pageHeader: 'Contribute', 
+									isAdmin: isAdmin(org, req.user), 
+									isSubscriber: isSubscriber(org, req.user),
+									monetaryNeed: (need.needType == "monetary"),
+									need: need,
+									errors: result.useFirstErrorOnly().array(),	
+								});						
+							} else {
+								var newContribution = new Contribution({
+									contributor: req.user.id,
+									need: need.id,
+									organization: org.id,
+									contributionAmount: donationAmount,
+									comments: comments,
+									status: 'pending',
+								});
+
+								if (publicName) newContribution.publicName = publicName;
+								if (pledgeDate) newContribution.pledgeDate = pledgeDate;
+
+								newContribution.save();
+								need.contributions.push(newContribution.id);
+								need.currentAmount += newContribution.contributionAmount;
+								need.save();
+
+								req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
+								res.redirect('/org/' + org.shortPath + '/needs');
+							}
+						});
+
+					} else {
+						res.redirect('/org/' + org.shortPath + '/needs');
+					}
+				} else {
+					next();
+				}
+			});
+
+		} else {
+			next();
+		}
+
+	});
 });
 
 /* GET and POST to needs/edit */

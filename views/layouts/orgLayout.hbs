@@ -66,7 +66,22 @@
     <script src='/javascripts/jscolor.min.js'></script>
     <script src='/javascripts/jquery-ui-1.12.1.custom/jquery-ui.min.js'></script>
 	<script>
+	
+		var setTotal = function(div1, div2){
+			var num = parseFloat($('#' + div1).val()).toFixed(2);
+			num = '$' + num;
+			if (num == '$NaN') num = 'Invalid';
+			$('#' + div2).html(num);
+		}
+		
 		$(document).ready(function(){
+	    	
+			$('[data-toggle="tooltip"]').tooltip({
+	    		'selector': '',
+    			'placement': 'bottom',
+    			'container':'body'
+	    	});   
+
 	    	{{#if activeMenuItem}}
 	    		$('#{{activeMenuItem}}').addClass("active");
 	    	{{/if}}
@@ -156,6 +171,9 @@
 	.large-text {
 		font-size: 150%;
 	}
+	.tooltip-inner {
+		max-width:700px;
+	}
 	p {
 		color: #5b5b5b;
 		line-height: 30px;
@@ -165,7 +183,7 @@
 		color: #5b5b5b;
 		line-height: 24px;
 	}
-	#themeForm, #newNeedForm {
+	#themeForm, #newNeedForm, #contributionForm {
 		text-align: right;
 	}
 	#needsFilter {

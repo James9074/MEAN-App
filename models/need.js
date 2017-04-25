@@ -45,6 +45,10 @@ var needSchema = mongoose.Schema({
 		type: Date,
 		required: false, //Not always applicable		
 	},
+	contributions: [{
+		type: ObjectId,
+		ref: 'Contribution',		
+	}],
 }, {timestamps: true});
 
 var Need = module.exports = mongoose.model('Need', needSchema);

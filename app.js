@@ -99,13 +99,25 @@ Handlebars.registerHelper('formatTime', function (date, format) {
     return mmnt.format(format);
 });
 
+Handlebars.registerHelper('formatCurrency', function (value) {
+    return parseFloat(value).toFixed(2);
+});
+
 Handlebars.registerHelper('calcProgress', function (currentAmount, goalAmount) {
     if (goalAmount == 0) return 100;
-    return ((currentAmount / goalAmount) * 10);
+    return Math.trunc((currentAmount / goalAmount) * 100);
+});
+
+Handlebars.registerHelper('calcProgressWidth', function (currentAmount, goalAmount) {
+    if (goalAmount == 0) return 100;
+    var result = ((currentAmount / goalAmount) * 100);
+    if (result > 100) result = 100;
+    result = Math.trunc(result);
+    return result;
 });
 
 Handlebars.registerHelper('isMonetary', function (needType) {
-    return (needType == "monetary") ? "$" : "";
+    return (needType == "monetary");
 });
 
 Handlebars.registerHelper('selected', function(option, value){
