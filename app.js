@@ -141,4 +141,17 @@ Handlebars.registerHelper("isAdvocateOfDepartment", function(dept, user) {
   if  (dept.advocates.indexOf(user.id) == -1) return false;
   return true;
 });
+
+Handlebars.registerHelper("slideGroupBeg", function(index, panels){
+    //panels is how many panels we are displaying in each group
+    if (index % panels == 0) return true;
+    return false;
+});
+
+Handlebars.registerHelper("slideGroupEnd", function(index, panels){
+    //panels is how many panels we are displaying in each group
+    if ((index % panels) == (panels - 1)) return true;
+    return false;
+});
+
 module.exports = app;

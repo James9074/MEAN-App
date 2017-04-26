@@ -16,6 +16,24 @@
 <hr>
 <div class="row">
 	<div class="col-xs-8">
+		{{#each contributions}}
+			{{#if (slideGroupBeg @index ../panels)}}
+				<div class="slideGroup">
+			{{/if}}
+			<div class="col-xs-6">
+				<div class="panel panel-default" id="panel{{@index}}">
+					<div class="panel-heading"><strong>{{this.publicName}}</strong></div>
+					<div class="panel-body">{{this.publicName}} donated {{this.contributionAmount}} item(s) to the need, '{{this.need.title}}' on {{formatTime this.createdAt "MMM DD, YYYY"}}. Thank you!</div>
+				</div>			
+			</div>
+			{{#if (slideGroupEnd @index ../panels)}}
+				</div>
+			{{else}}
+				{{#if @last}}
+					</div>
+				{{/if}}
+			{{/if}}
+		{{/each}}
 	</div>
 	<div class="col-xs-4">
 		<h2>Thank you!</h2>

@@ -86,12 +86,19 @@ router.get('/:name', function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			res.render('org/orgIndex', {layout: 'layouts/orgLayout',
-				title: org.name, 
-				org: org, 
-				isAdmin: isAdmin(org, req.user),
-				isSubscriber: isSubscriber(org, req.user),
-				activeMenuItem: 'homeMenuItem',
+			Contribution.find({organization: org.id}).populate('contributor need').limit(12).exec(function(err, contributions){
+				if (err) throw err;
+				var panels = 4; //The number of panels per slide set
+				res.render('org/orgIndex', {layout: 'layouts/orgLayout',
+					title: org.name, 
+					org: org, 
+					isAdmin: isAdmin(org, req.user),
+					isSubscriber: isSubscriber(org, req.user),
+					activeMenuItem: 'homeMenuItem',
+					contributions: contributions,
+					slideSets: Math.ceil(contributions.length / 4.0),
+					panels: panels,
+				});
 			});
 		} else {
 			next();
