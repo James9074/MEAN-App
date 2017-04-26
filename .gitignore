@@ -24,7 +24,9 @@ coverage
 data
 
 #uploads contents but not folder
-public/uploads
+public/uploads/*
+
+#exception
 !public/uploads/.gitkeep
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
