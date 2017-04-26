@@ -23,8 +23,9 @@ coverage
 #data directory
 data
 
-#uploads folder
+#uploads contents but not folder
 public/uploads
+!public/uploads/.gitkeep
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
