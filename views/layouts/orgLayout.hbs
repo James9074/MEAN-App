@@ -90,10 +90,10 @@
 							var nextSet = currentSet + 1;
 							if (nextSet == {{slideSets}}) nextSet = 0;
 							$(slideGroup[currentSet]).hide();
-							$(slideGroup[nextSet]).show();
+							$(slideGroup[nextSet]).addClass('animated fadeInRight').show();
 							currentSet = nextSet;
 						}, 
-					5000);
+					10000);
 				}
 
 				var slideGroups = $('.slideGroup:not(:first)');
