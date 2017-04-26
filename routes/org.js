@@ -861,4 +861,30 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 	});
 });
 
+/* GET and POST to donations */
+router.get('/:name/donations', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				Contribution.find({organization: org.id}).populate('contributor need').exec(function(err, contributions){
+					if (err) throw err;
+					res.render('org/orgDonations', {layout: 'layouts/orgLayout',
+						title: org.name, 
+						org: org, 
+						pageHeader: 'Donation Management', 
+						isAdmin: true, 
+						isSubscriber: true,
+						contributions: contributions,
+					});
+				});
+
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});
+});
 module.exports = router;

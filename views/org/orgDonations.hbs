@@ -1,0 +1,37 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+<div class="row">
+    <div class="col-xs-12">
+        <table class="table table-striped">
+        <thead>
+            <tr>
+            <th>Name</th>
+            <th>Need</th>
+            <th>Contribution</th>
+            <th>Delivery estimate</th>
+            <th>Email Address</th>
+            <th>Comments<th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each contributions}}
+                <tr>
+                    <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
+                    <td>{{this.need.title}}</td>                       
+                    <td>{{this.contributionAmount}}</td>
+                    <td>{{formatTime this.pledgeDate "MMM DD, YYYY"}}</td>
+                    <td>{{this.contributor.email}}</td>
+                    <td>{{this.comments}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+        </table>
+    </div>
+</div>
