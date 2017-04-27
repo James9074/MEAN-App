@@ -198,10 +198,10 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
 router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			if (isAdvocateforOrgPopped(org, req.user)) {
+			if (isAdvocateforOrg(org, req.user)) {
 
 				//Create need
 				var needTitle = req.body.needTitle;
@@ -223,6 +223,7 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 				req.getValidationResult().then(function(result){
 					if (!result.isEmpty()){
 						res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
+							user: req.user,
 							title: org.name, 
 							org: org, 
 							pageHeader: 'Add Need', 
@@ -458,7 +459,7 @@ router.get('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, ne
 
 router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
 		if (err) throw err;
 		if (org){
 			//Find the need
@@ -487,6 +488,7 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 						req.getValidationResult().then(function(result){
 							if (!result.isEmpty()){
 								res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
+									user: req.user,
 									title: org.name, 
 									org: org, 
 									pageHeader: 'Edit Need', 
