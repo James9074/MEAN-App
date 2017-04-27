@@ -624,17 +624,23 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 
 					if (req.body.payment_status == 'Completed') {
 						// Payment has been confirmed as completed
+						console.log('STATUS COMPLETED');
+						console.log(req.body.custom);
 						Contribution.findOne({id: req.body.custom}).exec(function(err, contribution){
 							if (err) throw err;
 							if (contribution) {
+								console.log('FOUND CONTRIBUTION');
+								console.log(contribution.need)
 								Need.findOne({id: contribution.need}).exec(function(err, need){
 									if (err) throw err;
 									if (need) {
+										console.log('FOUND NEED');
 										contribution.status = "approved";
 										contribution.save();
+										console.log('CONTRIBUTION SAVED');
 										need.currentAmount += contribution.contributionAmount;
 										need.save();
-
+										console.log('NEED SAVED');
 									} else {
 
 									}
