@@ -395,7 +395,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 										organization: org.id,
 										contributionAmount: donationAmount,
 										comments: comments,
-										status: 'pending',
+										status: 'incompletePayment',
 									});
 
 									if (publicName) newContribution.publicName = publicName;

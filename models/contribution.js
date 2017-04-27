@@ -29,7 +29,7 @@ var contributionSchema = mongoose.Schema({
 	},
  	status: {
         type: String,
-        enum: ['pending', 'approved', 'declined'],
+        enum: ['pending', 'approved', 'declined', 'incompletePayment'],
 		required: true,
 	},   
     publicName: { //The name in which the contribution is submitted as
