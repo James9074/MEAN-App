@@ -6,6 +6,8 @@ var crypto = require('crypto');
 var path = require('path');
 var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
+var bodyParser = require('body-parser');
+var request = require('request');
 var Organization = require('../models/organization');
 var Department = require('../models/department.js');
 var User = require('../models/user');
@@ -108,52 +110,74 @@ router.get('/register', function(req, res, next) {
 });
 
 router.post('/register', function(req, res, next){
-	var firstName = req.body.firstName;
-	var lastName = req.body.lastName;
-	var email = req.body.email;
-	var password = req.body.password;
-	var confirmPassword = req.body.confirmPassword;
+ 
+	// if its blank or null means user has not selected the captcha, so return the error.
+	if(req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
+		req.flash('error', 'You must select the captcha to verify that you are not a robot.');
+		res.redirect('/register');
+	} else {
+		var secretKey = "6LcC4B4UAAAAAI91rdS6S-HAep67XE4k1yBhO-qy";
 
-	//Validation
-	req.assert('firstName', 'First name is required.').notEmpty();
-	req.assert('lastName', 'Last name is required.').notEmpty();
-	req.assert('email', 'Email is required.').notEmpty();
-	req.assert('email', 'Email is not valid.').isEmail();
-	req.assert('password', 'Password is required.').notEmpty();
-	req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
-	req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
+		// req.connection.remoteAddress will provide IP address of connected user.
+		var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
+		// Hitting GET request to the URL, Google will respond with success or error scenario.
+		request(verificationUrl,function(error,response,body) {
+			body = JSON.parse(body);
+			// Success will be true or false depending upon captcha validation.
+			if(body.success !== undefined && !body.success) {
+				req.flash('error', 'The captcha verification failed.');
+				return res.redirect('/register');
+			} else{
+				//Success
+				var firstName = req.body.firstName;
+				var lastName = req.body.lastName;
+				var email = req.body.email;
+				var password = req.body.password;
+				var confirmPassword = req.body.confirmPassword;
 
-	req.getValidationResult().then(function(result){
+				//Validation
+				req.assert('firstName', 'First name is required.').notEmpty();
+				req.assert('lastName', 'Last name is required.').notEmpty();
+				req.assert('email', 'Email is required.').notEmpty();
+				req.assert('email', 'Email is not valid.').isEmail();
+				req.assert('password', 'Password is required.').notEmpty();
+				req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
+				req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
 
-		if (!result.isEmpty()){
-			res.render('base/register', {
-				layout: 'layouts/layout',
-				title: 'Registration',
-				pageHeader: 'Register',
-				errors: result.useFirstErrorOnly().array()
-			});
-		} else {
-			var newUser = new User({
-				firstName: firstName,
-				lastName: lastName,
-				email: email,
-				password: password
-			});
+				req.getValidationResult().then(function(result){
 
-			User.createUser(newUser, function(err, user){
-				if ( err && err.code === 11000 ) {
-					req.flash('error', 'Email already in use.');
-					res.redirect('/register');
-				} else if (err){
-					req.flash('error', 'Oops. An error occurred.');
-					res.redirect('/register');			
-				} else {
-					req.flash('success_msg', 'You are now registered! You may log in.');
-					res.redirect('/login');
-				}
-			});
-		}
-	});
+					if (!result.isEmpty()){
+						return res.render('base/register', {
+							layout: 'layouts/layout',
+							title: 'Registration',
+							pageHeader: 'Register',
+							errors: result.useFirstErrorOnly().array()
+						});
+					} else {
+						var newUser = new User({
+							firstName: firstName,
+							lastName: lastName,
+							email: email,
+							password: password
+						});
+
+						User.createUser(newUser, function(err, user){
+							if ( err && err.code === 11000 ) {
+								req.flash('error', 'Email already in use.');
+								return res.redirect('/register');
+							} else if (err){
+								req.flash('error', 'Oops. An error occurred.');
+								return res.redirect('/register');			
+							} else {
+								req.flash('success_msg', 'You are now registered! You may log in.');
+								return res.redirect('/login');
+							}
+						});
+					}
+				});
+			}
+		});
+	}
 });
 
 passport.use(new LocalStrategy({
