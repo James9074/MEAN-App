@@ -387,6 +387,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 							} else {
 								//If monetary, we redirect this to paypal.com
 								if (need.needType == 'monetary'){
+									req.body.custom = req.body;
 									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr');
 								} else {
 									var newContribution = new Contribution({
@@ -596,44 +597,20 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			console.log(req.body);
 
 			res.send(200);
 
 			ipn.verify(req.body, {'allow_sandbox': true}, function callback(err, msg) {
 				if (err) {
-					console.error(err);
+					throw (err);
 				} else {
 
 					if (req.body.payment_status == 'Completed') {
 						// Payment has been confirmed as completed
 						console.log('The payment has been completed and processed.');
 						console.log(req.body);
-					} else {
-						console.log(req.body.payment_status);
-						console.log(req.body);
-						// Set the headers
-						var headers = {
-							'User-Agent':       'Super Agent/0.0.1',
-							'Content-Type':     'application/x-www-form-urlencoded'
-						}
+					} 
 
-						// Configure the request
-						var options = {
-							url: 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr',
-							method: 'POST',
-							headers: headers,
-							form: req.body,
-						}
-
-						// Start the request
-						request(options, function (error, response, body) {
-							if (!error && response.statusCode == 200) {
-								// Print out the response body
-								console.log(body)
-							}
-						});
-					}
 				}
 			});
 
