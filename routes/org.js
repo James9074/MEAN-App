@@ -624,8 +624,6 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 
 					if (req.body.payment_status == 'Completed') {
 						// Payment has been confirmed as completed
-						console.log('The payment has been completed and processed.');
-						console.log(req.body);
 						Contribution.findOne({id: req.body.custom}).exec(function(err, contribution){
 							if (err) throw err;
 							if (contribution) {
@@ -636,17 +634,17 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 										contribution.save();
 										need.currentAmount += contribution.contributionAmount;
 										need.save();
-										return res.send('Thanks!');
+
 									} else {
-										return res.send('Thanks!');
+
 									}
 								});
 							} else {
-								return res.send('Thanks!');
+
 							}
 						});
 					} else {
-						return res.send('Thanks!');
+
 					} 
 				}
 			});
