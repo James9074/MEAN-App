@@ -602,6 +602,8 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 					console.error(err);
 				} else {
 					// Do stuff with original params here
+					console.log(req.body);
+					res.sendStatus(200);
 
 					if (req.body.payment_status == 'Completed') {
 					// Payment has been confirmed as completed
