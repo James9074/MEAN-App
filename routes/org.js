@@ -586,7 +586,7 @@ router.get('/:name/needs/failure', ensureAuthenticated, function(req, res, next)
 });
 
 /* This route exists to make sure payments were processed, and to create the monetary contribution as a response */
-router.get('/:name/needs/IPNhandler', function(req, res, next) {
+router.post('/:name/needs/IPNhandler', function(req, res, next) {
 
 	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
 		if (err) throw err;
