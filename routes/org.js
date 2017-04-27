@@ -636,16 +636,17 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 										contribution.save();
 										need.currentAmount += contribution.contributionAmount;
 										need.save();
+										return res.send('Thanks!');
 									} else {
-										return res.redirect('/');
+										return res.send('Thanks!');
 									}
 								});
 							} else {
-								return res.redirect('/');
+								return res.send('Thanks!');
 							}
 						});
 					} else {
-						return res.redirect('/');	
+						return res.send('Thanks!');
 					} 
 				}
 			});
