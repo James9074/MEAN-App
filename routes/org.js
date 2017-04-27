@@ -11,6 +11,7 @@ var path = require('path');
 var crypto = require('crypto');
 var fs = require('fs');
 var ipn = require('paypal-ipn');
+var request = require('request');
 
 //Configure ipn
 
