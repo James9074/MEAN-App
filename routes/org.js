@@ -597,7 +597,7 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 		if (org){
 			console.log(req.body);
 
-			ipn.verify(req.params, {'allow_sandbox': true}, function callback(err, msg) {
+			ipn.verify(req.body, {'allow_sandbox': true}, function callback(err, msg) {
 				if (err) {
 					console.error(err);
 				} else {
