@@ -597,6 +597,8 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 		if (org){
 			console.log(req.body);
 
+			res.send(200);
+
 			ipn.verify(req.body, {'allow_sandbox': true}, function callback(err, msg) {
 				if (err) {
 					console.error(err);
@@ -608,11 +610,9 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 						// Payment has been confirmed as completed
 						console.log('The payment has been completed and processed.');
 						console.log(req.body);
-						res.sendStatus(200);
 					} else {
 						console.log(req.body.payment_status);
 						console.log(req.body);
-						res.sendStatus(200);
 					}
 				}
 			});
