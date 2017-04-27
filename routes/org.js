@@ -9,6 +9,7 @@ var Contribution = require('../models/contribution');
 var multer = require('multer');
 var path = require('path');
 var crypto = require('crypto');
+var fs = require('fs');
 
 //Upload file extension
 var storage = multer.diskStorage({
@@ -665,6 +666,13 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 						 		fileName: req.files.logo[0].filename,
 								originalName: req.files.logo[0].originalname						
 							}
+
+							//Remove old logo from disk if there is one
+							if (org.logo){
+								var filePath = './public/uploads/' + org.logo.fileName; 
+								fs.unlinkSync(filePath);
+							}
+
 							org.logo = logo;
 						}
 						//Logo
@@ -672,6 +680,11 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 							var welcomeImage = {
 						 		fileName: req.files.welcomeImage[0].filename,
 								originalName: req.files.welcomeImage[0].originalname						
+							}
+							//Remove old welcome image from disk if there is one
+							if (org.welcomeImage){
+								var filePath = './public/uploads/' + org.welcomeImage.fileName; 
+								fs.unlinkSync(filePath);
 							}
 							org.welcomeImage = welcomeImage;
 						}
