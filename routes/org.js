@@ -601,14 +601,18 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 				if (err) {
 					console.error(err);
 				} else {
+					
 					// Do stuff with original params here
-					console.log(req.body);
-					res.sendStatus(200);
 
 					if (req.body.payment_status == 'Completed') {
-					// Payment has been confirmed as completed
-					console.log('The payment has been completed and processed.');
-					console.log(req.body);
+						// Payment has been confirmed as completed
+						console.log('The payment has been completed and processed.');
+						console.log(req.body);
+						res.sendStatus(200);
+					} else {
+						console.log(req.body.payment_status);
+						console.log(req.body);
+						res.sendStatus(200);
 					}
 				}
 			});
