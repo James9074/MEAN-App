@@ -10,6 +10,10 @@ var multer = require('multer');
 var path = require('path');
 var crypto = require('crypto');
 var fs = require('fs');
+var ipn = require('paypal-ipn');
+
+//Configure ipn
+
 
 //Upload file extension
 var storage = multer.diskStorage({
@@ -592,7 +596,22 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 		if (err) throw err;
 		if (org){
 			console.log(req.body);
-			res.send('Thanks Paypal! \'ppreciate it!');
+
+			ipn.verify(params, {'allow_sandbox': true}, function callback(err, msg) {
+				if (err) {
+					console.error(err);
+				} else {
+					// Do stuff with original params here
+
+					if (params.payment_status == 'Completed') {
+					// Payment has been confirmed as completed
+					console.log('The payment has been completed and processed.');
+					console.log(req.body);
+					}
+				}
+			});
+
+
 		} else {
 			next();
 		}
