@@ -603,8 +603,6 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 				if (err) {
 					console.error(err);
 				} else {
-					
-					// Do stuff with original params here
 
 					if (req.body.payment_status == 'Completed') {
 						// Payment has been confirmed as completed
@@ -613,6 +611,27 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 					} else {
 						console.log(req.body.payment_status);
 						console.log(req.body);
+						// Set the headers
+						var headers = {
+							'User-Agent':       'Super Agent/0.0.1',
+							'Content-Type':     'application/x-www-form-urlencoded'
+						}
+
+						// Configure the request
+						var options = {
+							url: 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr',
+							method: 'POST',
+							headers: headers,
+							form: req.body,
+						}
+
+						// Start the request
+						request(options, function (error, response, body) {
+							if (!error && response.statusCode == 200) {
+								// Print out the response body
+								console.log(body)
+							}
+						});
 					}
 				}
 			});
