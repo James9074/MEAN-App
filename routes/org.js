@@ -387,13 +387,25 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 							} else {
 								//If monetary, we redirect this to paypal.com
 								if (need.needType == 'monetary'){
-									req.body.custom = {
-										user: req.user.id,
-										donation: donationAmount,
+
+									//Go ahead and create the contribution, and set it to 'Pending'. We will use the IPN to set it to 'Approved'
+									var newContribution = new Contribution({
+										contributor: req.user.id,
+										need: need.id,
+										organization: org.id,
+										contributionAmount: donationAmount,
 										comments: comments,
-										publicName: publicName,
-									};
-									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr');
+										status: 'pending',
+									});
+
+									if (publicName) newContribution.publicName = publicName;
+									if (pledgeDate) newContribution.pledgeDate = pledgeDate;
+
+									newContribution.save();
+									need.contributions.push(newContribution.id);
+									need.save();
+
+									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr?custom=' + newContribution.id);
 								} else {
 									var newContribution = new Contribution({
 										contributor: req.user.id,
@@ -614,6 +626,24 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 						// Payment has been confirmed as completed
 						console.log('The payment has been completed and processed.');
 						console.log(req.body);
+						Contribution.findOne({id: req.body.custom}).exec(function(err, contribution){
+							if (err) throw err;
+							if (contribution) {
+								Need.findOne({id: contribution.need}).exec(function(err, need){
+									if (err) throw err;
+									if (need) {
+										contribution.status = "approved";
+										contribution.save();
+										need.currentAmount += contribution.contributionAmount;
+										need.save();
+									} else {
+										res.redirect('');
+									}
+								});
+							} else {
+								res.redirect('/');
+							}
+						});
 					} 
 
 				}
