@@ -387,8 +387,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 							} else {
 								//If monetary, we redirect this to paypal.com
 								if (need.needType == 'monetary'){
-									req.body.custom = req.body;
-									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr');
+									res.redirect(307, 'https://www.sandbox.paypal.com/cgi-bin/webscr?custom=test');
 								} else {
 									var newContribution = new Contribution({
 										contributor: req.user.id,
