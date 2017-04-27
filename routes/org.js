@@ -626,12 +626,12 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 						// Payment has been confirmed as completed
 						console.log('STATUS COMPLETED');
 						console.log(req.body.custom);
-						Contribution.findOne({id: req.body.custom}).exec(function(err, contribution){
+						Contribution.findOne({_id: req.body.custom}).exec(function(err, contribution){
 							if (err) throw err;
 							if (contribution) {
 								console.log('FOUND CONTRIBUTION');
 								console.log(contribution.need)
-								Need.findOne({id: contribution.need}).exec(function(err, need){
+								Need.findOne({_id: contribution.need}).exec(function(err, need){
 									if (err) throw err;
 									if (need) {
 										console.log('FOUND NEED');
