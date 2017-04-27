@@ -637,15 +637,16 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 										need.currentAmount += contribution.contributionAmount;
 										need.save();
 									} else {
-										res.redirect('');
+										return res.redirect('/');
 									}
 								});
 							} else {
-								res.redirect('/');
+								return res.redirect('/');
 							}
 						});
+					} else {
+						return res.redirect('/');	
 					} 
-
 				}
 			});
 
