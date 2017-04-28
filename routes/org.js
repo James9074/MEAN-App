@@ -952,8 +952,8 @@ router.get('/:name/donations', ensureAuthenticated, function(req, res, next) {
 						pageHeader: 'Donation Management', 
 						isAdmin: true, 
 						isSubscriber: true,
-						monetaryContributions: _.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}),
-						nonMonetaryContributions: _.filter(contributions, function(o){return (o.need.needType == "non-monetary")}),
+						monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
+						nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),
 					});
 				});
 
