@@ -1,0 +1,83 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+    {{#each errors}}
+        <div class="alert alert-danger">{{msg}}</div>
+    {{/each}}
+{{/if}}
+{{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<div class="row">
+	<form id="orgSettingsForm" method="post">
+	    <div class="col-xs-6">
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="orgName">Organization name:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="orgName" name="orgName" type="text" value="{{org.name}}">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="email">Organization email:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="email" name="email" value="{{user.email}}" type="text">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="address">Address: <a data-toggle="tooltip" title="The physical address of the organization.">?</a></label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="address" name="address" type="text" value="{{org.address}}">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-5">
+					<label for="city">City:</label>
+				</div>
+				<div class="col-xs-7">
+					<input class="form-control" id="city" name="city" type="text" value="{{org.city}}">
+				</div>
+			</div>
+			
+        </div>
+        <div class="col-xs-6" style="border-left: solid 1px #eee;height:350px;">
+            <div class="form-group row">
+                <div class="col-xs-5">
+                    <label for="state">State:</label>
+                </div>
+                <div class="col-xs-7">
+                    <input class="form-control" id="state" name="state" type="text" value="{{org.state}}">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-xs-5">
+                    <label for="zip">Zip:</label>
+                </div>
+                <div class="col-xs-7">
+                    <input class="form-control" id="zip" name="zip" type="text" value="{{org.zip}}">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-xs-5">
+                    <label for="zip">Payment method: <a data-toggle="tooltip" title="The method in which FaithByDeeds delivers monetary donations to the organization.">?</a></label>
+                </div>
+                <div class="col-xs-7">
+                    <select class="form-control" id="payment" name="payment">
+                        <option value="check" {{selected org.paymentOption "check"}}>Check</option>
+                        <option value="paypal" {{selected org.paymentOption "paypal"}}>Paypal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-xs-12">
+                    <input type="submit" class="btn" value="Submit">
+                </div>
+            </div>	
+        </div>
+    </form>
+</div>

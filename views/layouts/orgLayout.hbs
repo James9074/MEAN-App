@@ -27,6 +27,7 @@
 			{{#if isAdmin}}
 				<button type="button" class="btn alt-btn dropdown-toggle" data-toggle="dropdown">Organization <span class="caret"></span></button>
 				<ul class="dropdown-menu">
+					<li><a href="/org/{{org.shortPath}}/orgsettings">Basic Settings</a></li>					
 					<li><a href="/org/{{org.shortPath}}/theme">Theme Settings</a></li>
 					<li><a href="/org/{{org.shortPath}}/departments">Departments</a></li>
 					<li><a href="/org/{{org.shortPath}}/donations">Donation Management</a></li>
@@ -213,7 +214,7 @@
 		color: #5b5b5b;
 		line-height: 24px;
 	}
-	#themeForm, #newNeedForm, #contributionForm {
+	#themeForm, #newNeedForm, #contributionForm, #orgSettingsForm {
 		text-align: right;
 	}
 	#needsFilter {

@@ -1009,7 +1009,7 @@ router.post('/:name/donations', ensureAuthenticated, function(req, res, next) {
 	});
 });
 
-/* GET and POST to subscribers */
+/* GET subscribers */
 router.get('/:name/subscribers', ensureAuthenticated, function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).populate('admin subscribers').exec(function(err, org){
 		if (err) throw err;
@@ -1023,6 +1023,89 @@ router.get('/:name/subscribers', ensureAuthenticated, function(req, res, next) {
 					isAdmin: true, 
 					isSubscriber: true,
 				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});
+});
+
+/* GET and POST to orgsettings */
+router.get('/:name/orgsettings', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				if (err) throw err;
+				res.render('org/orgSettings', {layout: 'layouts/orgLayout',
+					title: org.name, 
+					org: org, 
+					pageHeader: 'Basic Settings', 
+					isAdmin: true, 
+					isSubscriber: true,
+				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});
+});
+
+router.post('/:name/orgsettings', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				if (err) throw err;
+
+
+				var orgName = req.body.orgName;
+				var email = req.body.email;
+				var address = req.body.address;
+				var city = req.body.city;
+				var state = req.body.state;
+				var zip = req.body.zip;
+				var payment = req.body.payment;
+
+				//Validation
+				req.assert('orgName', 'Organization name is required.').notEmpty();
+				req.assert('email', 'Organization email is required.').notEmpty();
+				req.assert('email', 'Organization email is not valid.').isEmail();
+				req.assert('address', 'Address is required.').notEmpty();
+				req.assert('city', 'City is required.').notEmpty();
+				req.assert('state', 'State is required.').notEmpty();
+				req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars	
+				req.assert('payment', 'Payment method is required.').notEmpty();
+
+				req.getValidationResult().then(function(result){
+					if (!result.isEmpty()){
+						res.render('org/orgSettings', {
+							layout: 'layouts/orgLayout',
+							title: org.name,
+							org: org, 
+							pageHeader: 'Basic Settings',
+							isAdmin: true, 
+							isSubscriber: true,
+							errors: result.useFirstErrorOnly().array(),
+						});
+					} else {						
+						org.name = orgName,
+						org.email = email,
+						org.address = address,
+						org.city = city,
+						org.state = state,
+						org.zip = zip,
+						org.paymentOption = payment,
+						org.save(); //Update the org
+						req.flash('success_msg', 'The organization settings have been updated.');
+						res.redirect('/org/' + org.shortPath + '/orgSettings');
+					}
+				});
+
 			} else {
 				res.redirect('/org/' + org.shortPath);
 			}
