@@ -1,0 +1,34 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<div class="row">
+    <div class="col-xs-4">
+        <ul class="list-group">
+            <li class="list-group-item">Subscriber count: {{org.subscribers.length}}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    {{#if org}}
+        {{#each org.subscribers}}
+            <div class="col-xs-3 margin-bottom-big" style="text-align:center;">
+                <div class="smallMargin"><strong>{{this.firstName}} {{this.lastName}}</strong></div>
+                {{#if this.avatar}}
+                    <img src="/uploads/{{this.avatar.fileName}}" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>
+                {{else}}
+                    <img src="/images/no-avatar.png" class="img img-circle" height="80px" width="80px" style="border: solid 1px #ccc;"/>		
+                {{/if}}
+
+                <div class="smallMargin"><small>Joined {{formatTime this.createdAt "MMM DD, YYYY"}}</small></div>
+            </div>
+        {{/each}}
+    {{/if}}
+</div>

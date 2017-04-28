@@ -1010,4 +1010,27 @@ router.post('/:name/donations', ensureAuthenticated, function(req, res, next) {
 	});
 });
 
+/* GET and POST to subscribers */
+router.get('/:name/subscribers', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin subscribers').exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				if (err) throw err;
+				res.render('org/orgSubscribers', {layout: 'layouts/orgLayout',
+					title: org.name, 
+					org: org, 
+					pageHeader: 'Subscribers', 
+					isAdmin: true, 
+					isSubscriber: true,
+				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});
+});
+
 module.exports = router;
