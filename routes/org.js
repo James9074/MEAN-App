@@ -92,7 +92,7 @@ router.get('/:name', function(req, res, next) {
 	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			Contribution.find({organization: org.id}).populate('contributor need').limit(12).exec(function(err, contributions){
+			Contribution.find({$and: [{organization: org.id}, {status: 'approved'}]}).populate('contributor need').limit(12).exec(function(err, contributions){
 				if (err) throw err;
 				var panels = 4; //The number of panels per slide set
 				res.render('org/orgIndex', {layout: 'layouts/orgLayout',

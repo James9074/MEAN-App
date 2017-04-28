@@ -82,8 +82,23 @@
 				<div class="col-xs-12">
                     <ul class="list-group">
                         <li class="list-group-item"><strong>Need: </strong>{{need.title}}</li>
-                        <li class="list-group-item"><strong>Goal: </strong>{{need.goalAmount}}</li>
-                        <li class="list-group-item"><strong>Contributed: </strong>{{need.currentAmount}}</li>
+                        <li class="list-group-item">
+                            <strong>Goal: </strong>
+                            {{#if monetaryNeed}}
+                                ${{formatCurrency need.goalAmount}}
+                            {{else}}
+                                {{need.goalAmount}}
+                            {{/if}}
+
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Contributed: </strong>
+                            {{#if monetaryNeed}}
+                                ${{formatCurrency need.currentAmount}}
+                            {{else}}
+                                {{need.currentAmount}}
+                            {{/if}}
+                        </li>
                         <li class="list-group-item"><strong>Needed by: </strong>{{formatTime need.needDate "MMM DD, YYYY"}}</li>
                         <li class="list-group-item"><strong>Department: </strong>{{need.department.departmentName}}</li>
                         <li class="list-group-item"><strong>Description: </strong>{{need.description}}</li>

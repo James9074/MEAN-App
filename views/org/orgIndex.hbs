@@ -23,7 +23,12 @@
 			<div class="col-xs-6">
 				<div class="panel panel-default" id="panel{{@index}}">
 					<div class="panel-heading"><strong>{{this.publicName}}</strong></div>
-					<div class="panel-body">{{this.publicName}} donated {{this.contributionAmount}} item(s) to the need, '{{this.need.title}}' on {{formatTime this.createdAt "MMM DD, YYYY"}}. Thank you!</div>
+					{{#if (isMonetary this.need.needType)}}
+						<div class="panel-body">{{this.publicName}} donated ${{formatCurrency this.contributionAmount}} to the need, '{{this.need.title}}' on {{formatTime this.createdAt "MMM DD, YYYY"}}. Thank you!</div>
+						
+					{{else}}
+						<div class="panel-body">{{this.publicName}} donated {{this.contributionAmount}} item(s) to the need, '{{this.need.title}}' on {{formatTime this.createdAt "MMM DD, YYYY"}}. Thank you!</div>
+					{{/if}}
 				</div>			
 			</div>
 			{{#if (slideGroupEnd @index ../panels)}}
