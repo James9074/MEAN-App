@@ -155,8 +155,8 @@ router.get('/:name/needs', function(req, res, next) {
 			}
 
 			//Sort
+			needs = _.sortBy(needs, "createdAt").reverse();
 			if (req.query.sortBy){
-				needs = _.sortBy(needs, "createdAt");
 				if (req.query.sortBy == "oldest") needs.reverse();
 			}
 
@@ -953,7 +953,8 @@ router.get('/:name/donations', ensureAuthenticated, function(req, res, next) {
 						pageHeader: 'Donation Management', 
 						isAdmin: true, 
 						isSubscriber: true,
-						contributions: contributions,
+						monetaryContributions: _.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}),
+						nonMonetaryContributions: _.filter(contributions, function(o){return (o.need.needType == "non-monetary")}),
 					});
 				});
 
@@ -965,4 +966,48 @@ router.get('/:name/donations', ensureAuthenticated, function(req, res, next) {
 		}
 	});
 });
+
+router.post('/:name/donations', ensureAuthenticated, function(req, res, next) {
+	Organization.findOne({shortPath: req.params.name}).populate('admin').populate({path: 'departments', populate: {path: 'advocates'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+			if (isAdmin(org, req.user)) {
+				Contribution.findOne({$and: [{organization: org.id}, {_id: req.body.contribution}] }).populate('contributor need').exec(function(err, contribution){
+					if (err) throw err;
+					if (contribution) {
+						if ((["pending", "declined", "approved"].indexOf(req.body.status) != -1) && contribution.need.needType == "non-monetary") {
+							
+							//Update the need's currentAmount
+							if (contribution.status == "approved" && req.body.status != "approved") { //Going from approved to declined or pending -- back out the current amount
+								contribution.need.currentAmount -= contribution.contributionAmount;
+								contribution.need.save();
+							} else if ( (contribution.status == "declined" || contribution.status == "pending") && req.body.status == "approved"){
+								contribution.need.currentAmount += contribution.contributionAmount;
+								contribution.need.save();
+							}
+
+							//Update the status of the contribution
+							contribution.status = req.body.status;
+							contribution.save();
+
+							req.flash('success_msg', 'The donation status has been updated.');
+							res.redirect('/org/' + org.shortPath + '/donations');
+						} else {
+							req.flash('error', 'There was a problem processing the request.');
+							res.redirect('/org/' + org.shortPath + '/donations');
+						}
+					} else {
+						req.flash('error', 'There was a problem processing the request.');
+						res.redirect('/org/' + org.shortPath + '/donations');						
+					}
+				});
+			} else {
+				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}
+	});
+});
+
 module.exports = router;
