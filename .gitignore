@@ -92,3 +92,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#config file -- use config-example.js as a template
+config.js

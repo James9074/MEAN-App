@@ -12,8 +12,17 @@ var crypto = require('crypto');
 var fs = require('fs');
 var ipn = require('paypal-ipn');
 var request = require('request');
+var Config = require('../config.js');
 
-//Configure ipn
+//Require and configure nodemailer
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+    service: Config.emailService,
+    auth: {
+        user: Config.emailUser,
+        pass: Config.emailPass,
+    }
+});
 
 
 //Upload file extension

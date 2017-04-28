@@ -11,6 +11,32 @@ var bodyParser = require('body-parser');
 var Organization = require('../models/organization');
 var Department = require('../models/department.js');
 var User = require('../models/user');
+var Config = require('../config.js');
+
+//Require and configure nodemailer
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+    service: Config.emailService,
+    auth: {
+        user: Config.emailUser,
+        pass: Config.emailPass,
+    }
+});
+
+//sendEmail function
+function sendEmail(subject, msg, email) {
+	var mailOptions = {
+		from: '"FaithByDeeds" <'+ Config.emailUser +'>', // sender address
+		to: email,
+		subject: subject,
+		text: msg,
+	};
+
+	transporter.sendMail(mailOptions, (err, info) => {
+		if (error) throw error;
+		//Message Sent
+	})
+}
 
 //Upload file extension
 var storage = multer.diskStorage({
@@ -169,6 +195,11 @@ router.post('/register', function(req, res, next){
 								req.flash('error', 'Oops. An error occurred.');
 								return res.redirect('/register');			
 							} else {
+
+								var msg = "Thanks for signing up!";
+								var subject = "Welcome to FaithByDeeds";
+								sendEmail(subject, msg, email);
+
 								req.flash('success_msg', 'You are now registered! You may log in.');
 								return res.redirect('/login');
 							}
