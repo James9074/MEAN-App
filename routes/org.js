@@ -421,7 +421,6 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 
 									newContribution.save();
 									need.contributions.push(newContribution.id);
-									need.currentAmount += newContribution.contributionAmount;
 									need.save();
 
 									req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
