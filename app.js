@@ -13,6 +13,7 @@ var LocalStrategy = require('passport-local');
 var session = require('express-session');
 var multer = require('multer');
 var Handlebars = require('hbs');
+var Config = require('./config.js');
 
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -53,7 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressValidator());
 
 app.use(session({
-  secret: 'secret',
+  secret: Config.sessionKey,
   saveUninitialized: true,
   resave: true
 }));

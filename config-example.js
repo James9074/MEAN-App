@@ -5,6 +5,7 @@ var config = {
     emailUser: 'example@gmail.com',
     emailPass: 'password',
     emailService: 'gmail',
+    sessionKey: 'example key',
 }
 
 module.exports = config;
