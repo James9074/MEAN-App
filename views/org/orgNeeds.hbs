@@ -6,20 +6,20 @@
 	<form method="GET" id="filterNeedsForm">
 		<div class="col-xs-10" id="needsFilter">
 			<div class="col-xs-3">
-				<input class="form-control" type="text" id="search" name="search" placeholder="Search"/>
+				<input class="form-control" type="text" id="search" name="search" placeholder="Search" value="{{query.search}}"/>
 			</div>
 			<div class="col-xs-3">
 				<select class="form-control" name="department" id="department">
 					<option value="">All departments</option>
 					{{#each org.departments}}
-						<option value="{{this.departmentName}}">{{this.departmentName}}</option>
+						<option value="{{this.departmentName}}" {{selected ../query.department this.departmentName}}>{{this.departmentName}}</option>
 					{{/each}}
 				</select>
 			</div>
 			<div class="col-xs-3">
 				<select class="form-control" name="sortBy" id="sortBy">
-					<option value="newest">Newest first</option>
-					<option value="oldest">Oldest first</option>
+					<option value="newest" {{selected query.sortBy "newest"}}>Newest first</option>
+					<option value="oldest" {{selected query.sortBy "oldest"}}>Oldest first</option>
 				</select>
 			</div>
 			<div class="col-xs-3"><button type="submit" class="btn">Filter Needs</button></div>

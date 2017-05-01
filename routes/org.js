@@ -209,6 +209,7 @@ router.get('/:name/needs', function(req, res, next) {
 				isAdvocate: isAdvocateforOrg(org, req.user),
 				activeMenuItem: 'needsMenuItem',
 				needs: needs,
+				query: req.query,
 			});
 		} else {
 			next();
