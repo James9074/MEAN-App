@@ -110,9 +110,6 @@ router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req,
 
 	ending.setDate(ending.getDate() + 1);
 
-	console.log(beginning);
-	console.log(ending);
-
 	Contribution.find({"createdAt": {"$gte": beginning, "$lt": ending}}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
 		res.render('base/donationRept', {layout: 'layouts/layout', 
 			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report', 

@@ -38,12 +38,10 @@
                     <tr>
                         <th>Date</th>
                         <th>Org</th>
-                        <th>Status</th>
-                        <th>Name</th>
+                        <th>Contributor</th>
                         <th>Need</th>
                         <th>Contribution</th>
                         <th>Delivery estimate</th>
-                        <th>Email Address</th>
                         <th>Comments<th>
                     </tr>
                 </thead>
@@ -52,12 +50,12 @@
                         <tr>
                             <td>{{formatTime this.createdAt "MMM DD, YYYY"}}</td>
                             <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
-                            <td>{{this.status}}</td>
-                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
+                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}<br>
+                                <a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a>
+                            </td>                   
                             <td>{{this.need.title}}</td>                       
-                            <td>{{this.contributionAmount}}</td>
+                            <td>{{this.contributionAmount}} - {{this.status}}</td>
                             <td>{{formatTime this.pledgeDate "MMM DD, YYYY"}}</td>
-                            <td><a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a></td>
                             <td><a data-toggle="tooltip" title="{{#if this.comments}}{{this.comments}}{{else}}No comments{{/if}}">?</a></td>
                         </tr>
                     {{/each}}
@@ -69,13 +67,10 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Org</th>
-                        <th>Org Details</th>
-                        <th>Payment Option</th>
-                        <th>Name</th>
+                        <th>Organization</th>
+                        <th>Contributor</th>
                         <th>Need</th>
                         <th>Contribution</th>
-                        <th>Email Address</th>
                         <th>Comments<th>
                     </tr>
                 </thead>
@@ -83,19 +78,21 @@
                     {{#each monetaryContributions}}
                         <tr>
                             <td>{{formatTime this.createdAt "MMM DD, YYYY"}}</td>
-                            <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
                             <td>
+                                <a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a><br><br>
                                 <a href="mailto:{{this.need.organization.email}}">{{this.need.organization.email}}</a><br>
                                 {{this.need.organization.address}}<br>
                                 {{this.need.organization.city}}<br>
                                 {{this.need.organization.state}}<br>
-                                {{this.need.organization.zip}}
-                            </th>
-                            <td>{{this.need.organization.paymentOption}}</td>
-                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
+                                {{this.need.organization.zip}}<br><br>
+                            
+                                Pay by: {{this.need.organization.paymentOption}}
+                            </td>
+                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}<br>
+                                <a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a>
+                            </td>                   
                             <td>{{this.need.title}}</td>                       
                             <td>${{formatCurrency this.contributionAmount}}</td>
-                            <td><a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a></td>
                             <td><a data-toggle="tooltip" title="{{#if this.comments}}{{this.comments}}{{else}}No comments{{/if}}">?</a></td>
                         </tr>
                     {{/each}}
