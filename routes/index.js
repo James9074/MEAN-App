@@ -1,4 +1,5 @@
 var express = require('express');
+var _ = require('lodash');
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var moment = require('moment');
@@ -11,8 +12,9 @@ var router = express.Router();
 var request = require('request');
 var bodyParser = require('body-parser');
 var Organization = require('../models/organization');
-var Department = require('../models/department.js');
+var Department = require('../models/department');
 var User = require('../models/user');
+var Contribution = require('../models/contribution');
 var Config = require('../config.js');
 
 //Require and configure nodemailer
@@ -73,6 +75,19 @@ function ensureAuthenticated(req, res, next){
 	}
 }
 
+function ensureSiteAdmin(req, res, next){
+	if (Config.siteAdmins.indexOf(req.user.email) != -1) {
+		return next();
+	} else {
+		req.flash('error_msg', 'You do not have access to that page.');
+		res.redirect('/dashboard');
+	}
+}
+
+function isSiteAdmin(user) {
+	return (Config.siteAdmins.indexOf(user.email) != -1);
+}
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
 	res.render('base/index', {layout: 'layouts/layout', title: 'Home | FaithByDeeds'});
@@ -84,6 +99,21 @@ router.get('/logout', function(req, res, next) {
 	req.flash('success_msg', 'You are now logged out.');
 	res.redirect('/login');
 });
+
+/* GET donation rept */
+router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req, res, next) {
+	
+	Contribution.find({}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
+		res.render('base/donationRept', {layout: 'layouts/layout', 
+			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report', 
+			activeMenuItem: 'adminMenuItem',
+			isSiteAdmin: isSiteAdmin(req.user),
+			nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),			
+			monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
+		});
+	})
+});
+
 
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
@@ -97,6 +127,7 @@ router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 				orgs: user.organizations,
 				subbedOrgs: user.subscriptions,
 				activeMenuItem: 'dashboardMenuItem',
+				isSiteAdmin: isSiteAdmin(req.user),
 			});
 		} else {
 			next();
@@ -179,7 +210,7 @@ router.post('/register', function(req, res, next){
 							layout: 'layouts/layout',
 							title: 'Registration',
 							pageHeader: 'Register',
-							errors: result.useFirstErrorOnly().array()
+							errors: result.useFirstErrorOnly().array(),
 						});
 					} else {
 						var newUser = new User({

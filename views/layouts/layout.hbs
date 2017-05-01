@@ -13,6 +13,9 @@
 			<div class="col-xs-7" id="menu">
 				{{#if user}}
 					<a class="menu-item" id="dashboardMenuItem" href="/dashboard">Dashboard</a>
+					{{#if isSiteAdmin}}
+						<a class="menu-item" id="adminMenuItem" href="/donation-rept">Admin</a>
+					{{/if}}
 					<a class="menu-item" id="logoutMenuItem" href="/logout">Logout</a>
 				{{else}}
 					<a class="menu-item" id="loginMenuItem" href="/login">Login</a>

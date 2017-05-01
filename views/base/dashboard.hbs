@@ -1,4 +1,7 @@
 <hr>
+{{#if error_msg}}
+	<div class="alert alert-danger">{{error_msg}}</div>
+{{/if}}
 <div class="row">
 	<div class="col-xs-5" style="text-align:center;">
 		{{#if error}}

@@ -6,6 +6,7 @@ var config = {
     emailPass: 'password',
     emailService: 'gmail',
     sessionKey: 'example key',
+    siteAdmins: ['example1@gmail.com', 'example2@gmail.com'], //Array of email addresses -- MUST BE LOWERCASE
 }
 
 module.exports = config;

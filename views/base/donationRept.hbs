@@ -1,0 +1,82 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+<div class="row">
+	<div class="col-xs-6">
+		<ul class="nav nav-tabs">
+		  <li class="active"><a data-toggle="tab" href="#nonmon">Non-monetary</a></li>
+		  <li><a data-toggle="tab" href="#mon">Monetary</a></li>
+		</ul>
+	</div>    
+</div>
+<div class="row">
+    <div class="col-xs-12">
+		<div class="tab-content">
+			<div id="nonmon" class="tab-pane fade in active">
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Org</th>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Need</th>
+                        <th>Contribution</th>
+                        <th>Delivery estimate</th>
+                        <th>Email Address</th>
+                        <th>Comments<th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each nonMonetaryContributions}}
+                        <tr>
+                            <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
+                            <td>{{this.status}}</td>
+                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
+                            <td>{{this.need.title}}</td>                       
+                            <td>{{this.contributionAmount}}</td>
+                            <td>{{formatTime this.pledgeDate "MMM DD, YYYY"}}</td>
+                            <td><a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a></td>
+                            <td><a data-toggle="tooltip" title="{{#if this.comments}}{{this.comments}}{{else}}No comments{{/if}}">?</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+                </table>
+			</div>
+			<div id="mon" class="tab-pane fade in">
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                    <th>Org</th>
+                    <th>Payment Option</th>
+                    <th>Name</th>
+                    <th>Need</th>
+                    <th>Contribution</th>
+                    <th>Email Address</th>
+                    <th>Comments<th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each monetaryContributions}}
+                        <tr>
+                            <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
+                            <td>{{this.need.organization.paymentOption}}</td>
+                            <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
+                            <td>{{this.need.title}}</td>                       
+                            <td>${{formatCurrency this.contributionAmount}}</td>
+                            <td><a href="mailto:{{this.contributor.email}}">{{this.contributor.email}}</a></td>
+                            <td><a data-toggle="tooltip" title="{{#if this.comments}}{{this.comments}}{{else}}No comments{{/if}}">?</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+                </table>
+			</div>
+		</div>
+
+    </div>
+</div>
