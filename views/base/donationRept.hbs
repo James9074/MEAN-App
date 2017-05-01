@@ -9,11 +9,25 @@
 {{/if}}
 <div class="row">
 	<div class="col-xs-6">
-		<ul class="nav nav-tabs">
+		<ul class="nav nav-tabs margin-bottom">
 		  <li class="active"><a data-toggle="tab" href="#nonmon">Non-monetary</a></li>
 		  <li><a data-toggle="tab" href="#mon">Monetary</a></li>
 		</ul>
 	</div>    
+</div>
+<div class="row margin-bottom">
+    <form method="get">
+        <div class="col-xs-3">
+            <input class="form-control datepicker" type="text" placeholder="Beginning date" name="beg" value="{{beginning}}" />
+        </div>
+        <div class="col-xs-3">
+            <input class="form-control datepicker" type="text" placeholder="Ending date" name="end" value="{{ending}}" />
+        </div>
+        <div class="col-xs-3">
+            <button class="btn" type="submit">Filter</button>
+        </div>
+        <div class="col-xs-3"></div>
+    </form>
 </div>
 <div class="row">
     <div class="col-xs-12">
@@ -22,6 +36,7 @@
                 <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Date</th>
                         <th>Org</th>
                         <th>Status</th>
                         <th>Name</th>
@@ -35,6 +50,7 @@
                 <tbody>
                     {{#each nonMonetaryContributions}}
                         <tr>
+                            <td>{{formatTime this.createdAt "MMM DD, YYYY"}}</td>
                             <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
                             <td>{{this.status}}</td>
                             <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
@@ -52,19 +68,29 @@
                 <table class="table table-striped">
                 <thead>
                     <tr>
-                    <th>Org</th>
-                    <th>Payment Option</th>
-                    <th>Name</th>
-                    <th>Need</th>
-                    <th>Contribution</th>
-                    <th>Email Address</th>
-                    <th>Comments<th>
+                        <th>Date</th>
+                        <th>Org</th>
+                        <th>Org Details</th>
+                        <th>Payment Option</th>
+                        <th>Name</th>
+                        <th>Need</th>
+                        <th>Contribution</th>
+                        <th>Email Address</th>
+                        <th>Comments<th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each monetaryContributions}}
                         <tr>
+                            <td>{{formatTime this.createdAt "MMM DD, YYYY"}}</td>
                             <td><a href="/org/{{this.need.organization.shortPath}}">{{this.need.organization.name}}</a></td>
+                            <td>
+                                <a href="mailto:{{this.need.organization.email}}">{{this.need.organization.email}}</a><br>
+                                {{this.need.organization.address}}<br>
+                                {{this.need.organization.city}}<br>
+                                {{this.need.organization.state}}<br>
+                                {{this.need.organization.zip}}
+                            </th>
                             <td>{{this.need.organization.paymentOption}}</td>
                             <td>{{this.contributor.firstName}} {{this.contributor.lastName}}</td>                   
                             <td>{{this.need.title}}</td>                       

@@ -103,13 +103,25 @@ router.get('/logout', function(req, res, next) {
 /* GET donation rept */
 router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req, res, next) {
 	
-	Contribution.find({}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
+	var beginning = new Date(req.query.beg);
+	var ending = new Date(req.query.end);
+	if (!req.query.beg) beginning = new Date(0);
+	if (!req.query.end) ending = new Date("December 30, 2999");
+
+	ending.setDate(ending.getDate() + 1);
+
+	console.log(beginning);
+	console.log(ending);
+
+	Contribution.find({"createdAt": {"$gte": beginning, "$lt": ending}}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
 		res.render('base/donationRept', {layout: 'layouts/layout', 
 			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report', 
 			activeMenuItem: 'adminMenuItem',
 			isSiteAdmin: isSiteAdmin(req.user),
 			nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),			
 			monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
+			beginning: req.query.beg,
+			ending: req.query.end, 
 		});
 	})
 });
