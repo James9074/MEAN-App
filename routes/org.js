@@ -684,12 +684,12 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 										need.currentAmount += contribution.contributionAmount;
 										
 										/* Send email to contributor and org admin */
-										var msg = "Hello,\n\nYou have contributed $" + contribution.contributionAmount + " to the need '" + need.title + "'.\n\nThank you!";
+										var msg = "Hello,\n\nYou have contributed $" + parseFloat(contribution.contributionAmount).toFixed(2) + " to the need '" + need.title + "'.\n\nThank you!";
 										var subject = "FaithByDeeds - You've just made a contribution!";
 										sendEmail(subject, msg, contribution.contributor.email);									
 
 										var msg = contribution.contributor.firstName + " " + contribution.contributor.lastName + " (" + contribution.contributor.email + ") has donated to your need, '" + need.title + "'!\n\n" 
-											+ "Amount: $" + contribution.contributionAmount;
+											+ "Amount: $" + parseFloat(contribution.contributionAmount).toFixed(2);
 										var subject = "FaithByDeeds - There has been a donation made to your need!";
 										sendEmailCC(subject, msg, org.admin.email, need.creator.email);					
 										
