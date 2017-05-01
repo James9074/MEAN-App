@@ -31,6 +31,15 @@ var userSchema = mongoose.Schema({
 		type: String,
 		required: true
 	},
+	resetPasswordToken: {
+		type: String,
+		required: false,
+		unique: true,
+	},
+	resetPasswordExpires: {
+		type: Date,
+		required: false,
+	},
 	avatar: imgSchema,
 	organizations: [{ type: ObjectId, ref: 'Organization'}],
 	subscriptions: [{ type: ObjectId, ref: 'Organization'}],

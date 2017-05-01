@@ -1,9 +1,11 @@
 var express = require('express');
+var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var moment = require('moment');
 var multer = require('multer');
 var crypto = require('crypto');
 var path = require('path');
+var async = require('async');
 var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
 var request = require('request');
@@ -255,6 +257,113 @@ router.post('/login',
   function(req, res) {
   	res.redirect('/dashboard');
   });
+
+/* GET and POST to forgot */
+router.get('/forgot', function(req, res, next) {
+	res.render('base/forgot', {layout: 'layouts/layout', title: 'Forgot Password | FaithByDeeds', pageHeader: 'Forgot Password'});
+});
+
+router.post('/forgot', function(req, res, next) {
+  async.waterfall([
+    function(done) {
+      crypto.randomBytes(20, function(err, buf) {
+        var token = buf.toString('hex');
+        done(err, token);
+      });
+    },
+    function(token, done) {
+      User.findOne({ email: req.body.email.toLowerCase() }, function(err, user) {
+        if (!user) {
+          req.flash('error', 'No account with that email address exists.');
+          return res.redirect('/forgot');
+        }
+
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+        user.save(function(err) {
+			if (err) throw err;
+			done(err, token, user);
+        });
+      });
+    },
+    function(token, user, done) {
+
+		var msg = "Hello,\n\nYou've requested the reset of the password for your account.\n\nPlease click on the following link to change your password.\n\nIf you did not intend to reset your password, ignore this email."
+		+ "\n\n" + req.protocol + '://' + req.get('host') + '/reset/' + token;
+		var subject = "FaithByDeeds - Password reset";
+		sendEmail(subject, msg, user.email);
+
+		req.flash('success_msg', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+		done(null, 'done');
+    }
+  ], function(err) {
+    if (err) return next(err);
+    res.redirect('/forgot');
+  });
+});
+
+/* GET and POST to reset */
+router.get('/reset/:token', function(req, res) {
+  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+    if (!user) {
+      req.flash('error', 'Password reset token is invalid or has expired.');
+      return res.redirect('/forgot');
+    }
+	res.render('base/resetPassword', {layout: 'layouts/layout', title: 'Reset Password | FaithByDeeds', pageHeader: 'Reset Password'});
+  });
+});
+
+router.post('/reset/:token', function(req, res) {
+  async.waterfall([
+    function(done) {
+      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+        if (!user) {
+          req.flash('error', 'Password reset token is invalid or has expired.');
+          return res.redirect('back');
+        }
+
+		var password = req.body.password;
+		var confirmPassword = req.body.confirmPassword;
+
+		req.assert('password', 'Password is required.').notEmpty();
+		req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
+		req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
+
+		req.getValidationResult().then(function(result){
+
+			if (!result.isEmpty()){
+				return res.render('base/resetPassword', {
+					layout: 'layouts/layout',
+					title: 'Reset Password | FaithByDeeds',
+					pageHeader: 'Reset Password',
+					errors: result.useFirstErrorOnly().array()
+				});
+			} else {
+				//Update password
+				user.resetPasswordToken = undefined;
+        		user.resetPasswordExpires = undefined;
+        		user.password = req.body.password;
+
+				User.createUser(user, function(err, user){
+					if (err) throw err;
+					var msg = "Hello,\n\nThe password associated with your FaithByDeeds account has been reset. ";
+					var subject = "FaithByDeeds - Password changed";
+					sendEmail(subject, msg, user.email);
+
+					req.flash('success_msg', 'The password has been reset! You may log in.');
+					return res.redirect('/login');
+				});
+
+			}
+		});
+
+      });
+    },
+  ], function(err) {
+    res.redirect('/');
+  });
+});
 
 /* GET and POST to org-create */
 router.get('/org-create', ensureAuthenticated, function(req, res, next){
