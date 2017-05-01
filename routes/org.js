@@ -24,6 +24,36 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+//sendEmail function
+function sendEmail(subject, msg, email) {
+	var mailOptions = {
+		from: '"FaithByDeeds" <'+ Config.emailUser +'>', // sender address
+		to: email,
+		subject: subject,
+		text: msg,
+	};
+
+	transporter.sendMail(mailOptions, (err, info) => {
+		if (error) throw error;
+		//Message Sent
+	})
+}
+
+//sendEmail function with cc address
+function sendEmailCC(subject, msg, email, cc) {
+	var mailOptions = {
+		from: '"FaithByDeeds" <'+ Config.emailUser +'>', // sender address
+		to: email,
+		cc: cc,
+		subject: subject,
+		text: msg,
+	};
+
+	transporter.sendMail(mailOptions, (err, info) => {
+		if (error) throw error;
+		//Message Sent
+	})
+}
 
 //Upload file extension
 var storage = multer.diskStorage({
@@ -351,7 +381,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 		if (err) throw err;
 		if (org){
 			//Find the need
-			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('creator department').exec(function(err, need){
 				if (err) throw err;
 				if (need){
 					if (isSubscriber(org, req.user)) {
@@ -431,6 +461,17 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									newContribution.save();
 									need.contributions.push(newContribution.id);
 									need.save();
+
+									/* Send email to contributor and org admin */
+									var msg = "Hello,\n\nYou have pledged to contribute" + donationAmount + " of the needed items to the need '" + need.title + "'. The expected delivery date is " + pledgeDate + "."
+										+ "\n\nOnce the items have been delivered and the donation status has been updated, the donation will appear on the site. \n\nThank you so much!\n\nOrganization address:\n\n" + org.address + "\n" + org.city + "\n" + org.state + "\n" + org.zip;
+									var subject = "FaithByDeeds - You've just made a pledge!";
+									sendEmail(subject, msg, req.user.email);									
+
+									var msg = req.user.firstName + " " + req.user.lastName + " (" + req.user.email + ") has pledged to donate to your need, '" + need.title + "'!\n\n" 
+										+ "The status of the contribution is 'Pending'. Once the items have been delivered, the organization administrator should change the status to 'Approved'. \n\nQuantity: " + donationAmount + "\n\nExpected Delivery: " + pledgeDate;
+									var subject = "FaithByDeeds - There has been a donation made to your need!";
+									sendEmailCC(subject, msg, org.admin.email, need.creator.email);									
 
 									req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
 									res.redirect('/org/' + org.shortPath + '/needs');
@@ -619,7 +660,7 @@ router.get('/:name/needs/failure', ensureAuthenticated, function(req, res, next)
 /* This route exists to make sure payments were processed, and to create the monetary contribution as a response */
 router.post('/:name/needs/IPNhandler', function(req, res, next) {
 
-	Organization.findOne({shortPath: req.params.name}).exec(function(err, org){
+	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
 		if (err) throw err;
 		if (org){
 
@@ -632,15 +673,26 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 
 					if (req.body.payment_status == 'Completed') {
 						// Payment has been confirmed as completed
-						Contribution.findOne({_id: req.body.custom}).exec(function(err, contribution){
+						Contribution.findOne({_id: req.body.custom}).populate('contributor').exec(function(err, contribution){
 							if (err) throw err;
 							if (contribution) {
-								Need.findOne({_id: contribution.need}).exec(function(err, need){
+								Need.findOne({_id: contribution.need}).populate('creator').exec(function(err, need){
 									if (err) throw err;
 									if (need) {
 										contribution.status = "approved";
 										contribution.save();
 										need.currentAmount += contribution.contributionAmount;
+										
+										/* Send email to contributor and org admin */
+										var msg = "Hello,\n\nYou have contributed $" + contribution.contributionAmount + " to the need '" + need.title + "'.\n\nThank you!";
+										var subject = "FaithByDeeds - You've just made a contribution!";
+										sendEmail(subject, msg, contribution.contributor.email);									
+
+										var msg = contribution.contributor.firstName + " " + contribution.contributor.lastName + " (" + contribution.contributor.email + ") has donated to your need, '" + need.title + "'!\n\n" 
+											+ "Amount: $" + contribution.contributionAmount;
+										var subject = "FaithByDeeds - There has been a donation made to your need!";
+										sendEmailCC(subject, msg, org.admin.email, need.creator.email);					
+										
 										need.save();
 									} else {
 

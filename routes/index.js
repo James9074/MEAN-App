@@ -196,8 +196,8 @@ router.post('/register', function(req, res, next){
 								return res.redirect('/register');			
 							} else {
 
-								var msg = "Thanks for signing up!";
-								var subject = "Welcome to FaithByDeeds";
+								var msg = "Hello,\n\nYou've successfully created a FaithByDeeds account! To login and access your dashboard, go to the following URL:\n\n" + req.protocol + '://' + req.get('host') + "/login";
+								var subject = "FaithByDeeds - Thanks for signing up!";
 								sendEmail(subject, msg, email);
 
 								req.flash('success_msg', 'You are now registered! You may log in.');
@@ -331,6 +331,12 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 					req.flash('error', 'Oops. An error occurred.');
 					res.redirect('/org-create');			
 				} else {
+
+					/* Send email */
+					var msg = "Hello,\n\nYou've set up a new organization on FaithByDeeds! You can access the organization from the user dashboard, or from the URL below:\n\n" + req.protocol + '://' + req.get('host') + '/org/' + short;
+					var subject = "FaithByDeeds - You've created a new organization!";
+					sendEmail(subject, msg, req.user.email);
+
 					req.user.organizations.push(org.id);
 					req.user.subscriptions.push(org.id);
 					req.user.save();
