@@ -93,6 +93,21 @@ router.get('/', function(req, res, next) {
 	res.render('base/index', {layout: 'layouts/layout', title: 'Home | FaithByDeeds'});
 });
 
+/* GET about page */
+router.get('/about', function(req, res, next) {
+	res.render('base/about', {layout: 'layouts/layout', title: 'About | FaithByDeeds'});
+});
+
+/* GET FAQ page */
+router.get('/faq', function(req, res, next) {
+	res.render('base/faq', {layout: 'layouts/layout', title: 'FAQ | FaithByDeeds'});
+});
+
+/* GET terms */
+router.get('/terms', function(req, res, next) {
+	res.render('base/terms', {layout: 'layouts/layout', title: 'Terms of Service | FaithByDeeds'});
+});
+
 /* GET logout */
 router.get('/logout', function(req, res, next) {
 	req.logout();

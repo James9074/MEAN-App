@@ -12,6 +12,8 @@
 				<a href="/"><img id="mainImage" src="/images/logo-main.png" class="img img-responsive"></a>
 			</div>
 			<div class="col-xs-7" id="menu">
+					<a class="menu-item" id="aboutMenuItem" href="/about">About</a>
+					<a class="menu-item" id="faqMenuItem" href="/faq">FAQ</a>					
 				{{#if user}}
 					<a class="menu-item" id="dashboardMenuItem" href="/dashboard">Dashboard</a>
 					{{#if isSiteAdmin}}
@@ -143,6 +145,22 @@
 		background-size: cover;
     	background-position: center center;
     	overflow: hidden;
+	}
+	#aboutSlider {
+	    position: relative;
+    	height: 300px;
+		background: url('../images/volunteering.jpg') 0 0 no-repeat;
+		background-size: cover;
+    	background-position: center center;
+    	overflow: hidden;		
+	}
+	#aboutSlider {
+	    position: relative;
+    	height: 300px;
+		background: url('../images/volunteering2.jpg') 0 0 no-repeat;
+		background-size: cover;
+    	background-position: center top;
+    	overflow: hidden;		
 	}
 	#homepageQuote h2 {
 		color: green;
