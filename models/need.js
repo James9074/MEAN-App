@@ -49,6 +49,12 @@ var needSchema = mongoose.Schema({
 		type: ObjectId,
 		ref: 'Contribution',		
 	}],
+	status: {
+		type: String,
+		enum: ['public', 'archived'],
+		default: 'public',
+		required: true,
+	},
 }, {timestamps: true});
 
 var Need = module.exports = mongoose.model('Need', needSchema);

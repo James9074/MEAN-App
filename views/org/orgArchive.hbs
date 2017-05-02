@@ -1,3 +1,4 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
 {{#if error}}
 	<div class="alert alert-danger">{{error}}</div>
 {{/if}}
@@ -28,19 +29,6 @@
 	<div class="col-xs-1"></div>
 </div>
 
-{{#if isAdvocate}}
-	<div class="row">
-		<div class="col-xs-1"></div>
-		<div class="col-xs-10">
-			<a type="button" class="btn" href="/org/{{org.shortPath}}/needs/new">+ Add New Need</a>
-			{{#if isAdmin}}
-				<a type="button" class="btn" href="/org/{{org.shortPath}}/archive/">Needs Archive &#187</a>
-			{{/if}}
-		</div>
-		<div class="col-xs-1"></div>
-	</div>
-{{/if}}
-
 <hr>
 
 {{#each needs}}
@@ -49,13 +37,8 @@
 			<div class="col-xs-12"><h2>{{this.title}}</h2></div>
 			<div class="col-xs-11"><p>{{this.description}}</p></div><div class="col-xs-1"></div>
 			<div class="col-xs-12">
-				{{#if ../isSubscriber}}
-					<a type="button" class="btn" href="/org/{{../org.shortPath}}/needs/contribute/{{this.id}}">Contribute</a>
-				{{else}}
-					<a type="button" class="btn dis-btn" href="">Contribute</a>				
-				{{/if}}
-				<span class="distinct-text">OR</span>
-				<a class="org-link" href="mailto:{{this.creator.email}}">Contact via email</a>
+
+			<a class="org-link" href="mailto:{{this.creator.email}}">Contact via email</a>
 
 			</div>
 		</div>
@@ -73,12 +56,8 @@
 				</div>
 			</div>
 			<div class="col-xs-12">
-				{{#if (isAdvocateOfNeed this ../user)}}
-					<a type="button" class="btn alt-btn" href="/org/{{../org.shortPath}}/needs/edit/{{this.id}}">Edit need</a>
-				{{/if}}
-				{{#if ../isAdmin}}
-					<a type="button" class="btn" href="/org/{{../org.shortPath}}/needs?archive={{this.id}}">Archive need</a>
-				{{/if}}
+			    <a type="button" class="btn alt-btn" href="/org/{{../org.shortPath}}/needs/edit/{{this.id}}">Edit need</a>
+				<a type="button" class="btn" href="/org/{{../org.shortPath}}/archive?publish={{this.id}}">Publish need</a>
 			</div>
 		</div>
 	</div>

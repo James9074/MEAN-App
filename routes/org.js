@@ -182,35 +182,51 @@ router.get('/:name/needs', function(req, res, next) {
 		if (org){
 
 			var needs = org.needs;
+			
+			//Only show public needs - not archived
+			needs = _.filter(needs, function(o){ return (o.status == "public")});
 
-			//Filter by department
-			if(req.query.department){
-				needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
+			if (isAdmin(org, req.user) && req.query.archive) {
+				needs = _.filter(needs, function(o){ return (o._id == req.query.archive)});
+				if (needs.length == 1) {
+					needs[0].status = "archived";
+					needs[0].save();
+					req.flash('success_msg', 'The need was archived.');
+					res.redirect('/org/' + org.shortPath + '/needs');
+				} else {
+					req.flash('error', 'There was a problem processing the request.');
+					res.redirect('/org/' + org.shortPath + '/needs');					
+				}
+			} else {
+				//Filter by department
+				if(req.query.department){
+					needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
+				}
+
+				//Filter by search term
+				if (req.query.search){
+					needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
+				}
+
+				//Sort
+				needs = _.sortBy(needs, "createdAt").reverse();
+				if (req.query.sortBy){
+					if (req.query.sortBy == "oldest") needs.reverse();
+				}
+
+				res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
+					user: req.user,
+					title: org.name, 
+					org: org, 
+					pageHeader: 'Needs', 
+					isAdmin: isAdmin(org, req.user), 
+					isSubscriber: isSubscriber(org, req.user),
+					isAdvocate: isAdvocateforOrg(org, req.user),
+					activeMenuItem: 'needsMenuItem',
+					needs: needs,
+					query: req.query,
+				});				
 			}
-
-			//Filter by search term
-			if (req.query.search){
-				needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
-			}
-
-			//Sort
-			needs = _.sortBy(needs, "createdAt").reverse();
-			if (req.query.sortBy){
-				if (req.query.sortBy == "oldest") needs.reverse();
-			}
-
-			res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
-				user: req.user,
-				title: org.name, 
-				org: org, 
-				pageHeader: 'Needs', 
-				isAdmin: isAdmin(org, req.user), 
-				isSubscriber: isSubscriber(org, req.user),
-				isAdvocate: isAdvocateforOrg(org, req.user),
-				activeMenuItem: 'needsMenuItem',
-				needs: needs,
-				query: req.query,
-			});
 		} else {
 			next();
 		}	
@@ -234,6 +250,70 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 				});
 			} else {
 				res.redirect('/org/' + org.shortPath);
+			}
+		} else {
+			next();
+		}	
+	});
+});
+
+/* GET the needs archive */
+router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+
+			if (isAdmin(org, req.user)) {
+
+				var needs = org.needs;
+				
+				//Only show archived needs - not public
+				needs = _.filter(needs, function(o){ return (o.status == "archived")});
+
+				if (req.query.publish) {
+					needs = _.filter(needs, function(o){ return (o._id == req.query.publish)});
+					if (needs.length == 1) {
+						needs[0].status = "public";
+						needs[0].save();
+						req.flash('success_msg', 'The need was published.');
+						res.redirect('/org/' + org.shortPath + '/needs');
+					} else {
+						req.flash('error', 'There was a problem processing the request.');
+						res.redirect('/org/' + org.shortPath + '/needs');					
+					}
+				} else {
+			
+					//Filter by department
+					if(req.query.department){
+						needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
+					}
+
+					//Filter by search term
+					if (req.query.search){
+						needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
+					}
+
+					//Sort
+					needs = _.sortBy(needs, "createdAt").reverse();
+					if (req.query.sortBy){
+						if (req.query.sortBy == "oldest") needs.reverse();
+					}
+
+					res.render('org/orgArchive', {layout: 'layouts/orgLayout',
+						user: req.user,
+						title: org.name, 
+						org: org, 
+						pageHeader: 'Archive', 
+						isAdmin: true, 
+						isSubscriber: true,
+						isAdvocate: true,
+						needs: needs,
+						query: req.query,
+					});
+				}				
+			} else {
+				res.redirect('/org/' + org.shortPath + '/needs');				
 			}
 		} else {
 			next();
@@ -346,7 +426,7 @@ router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, r
 		if (err) throw err;
 		if (org){
 			//Find the need
-			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}]}).populate('department').exec(function(err, need){
+			Need.findOne({$and: [{_id: req.params.need}, {organization: org.id}, {status: 'public'}]}).populate('department').exec(function(err, need){
 				if (err) throw err;
 				if (need){
 					if (isSubscriber(org, req.user)) {
