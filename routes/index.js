@@ -244,23 +244,23 @@ router.post('/register', function(req, res, next){
 							password: password
 						});
 
-						User.createUser(newUser, function(err, user){
-							if ( err && err.code === 11000 ) {
+						User.findOne({email: email.toLowerCase()}).exec(function(err, user) {
+							if (!user) {
+								User.createUser(newUser, function(err, user){
+									if ( err ) throw err;
+									var msg = "Hello,\n\nYou've successfully created a FaithByDeeds account! To login and access your dashboard, go to the following URL:\n\n" + req.protocol + '://' + req.get('host') + "/login";
+									var subject = "FaithByDeeds - Thanks for signing up!";
+									sendEmail(subject, msg, email);
+
+									req.flash('success_msg', 'You are now registered! You may log in.');
+									return res.redirect('/login');
+								});				
+							} else {
 								req.flash('error', 'Email already in use.');
 								return res.redirect('/register');
-							} else if (err){
-								req.flash('error', 'Oops. An error occurred.');
-								return res.redirect('/register');			
-							} else {
-
-								var msg = "Hello,\n\nYou've successfully created a FaithByDeeds account! To login and access your dashboard, go to the following URL:\n\n" + req.protocol + '://' + req.get('host') + "/login";
-								var subject = "FaithByDeeds - Thanks for signing up!";
-								sendEmail(subject, msg, email);
-
-								req.flash('success_msg', 'You are now registered! You may log in.');
-								return res.redirect('/login');
 							}
 						});
+
 					}
 				});
 			}
