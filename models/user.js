@@ -34,7 +34,6 @@ var userSchema = mongoose.Schema({
 	resetPasswordToken: {
 		type: String,
 		required: false,
-		unique: true,
 	},
 	resetPasswordExpires: {
 		type: Date,
