@@ -40,6 +40,11 @@
     <script src='/javascripts/jquery-ui-1.12.1.custom/jquery-ui.min.js'></script>
 	<script src='https://www.google.com/recaptcha/api.js'></script>   
 	<script>
+
+		var updateHref = function(){
+			$('#tellFriendBtn').attr('href', 'mailto:' + $('#tellFriendEmail').val());
+		}
+
 		$(document).ready(function(){
 	    	$('[data-toggle="tooltip"]').tooltip({
 	    		'selector': '',

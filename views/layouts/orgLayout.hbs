@@ -78,6 +78,10 @@
 			$('#ppAmount').val(num.substring(1));
 		}
 
+		var updateHref = function(){
+			$('#tellFriendBtn').attr('href', 'mailto:' + $('#tellFriendEmail').val());
+		}
+
 		{{#if panels}}
 			var currentSet = 0;
 		{{/if}}
