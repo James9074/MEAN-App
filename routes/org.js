@@ -525,7 +525,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									need.contributions.push(newContribution.id);
 									need.save();
 
-									res.redirect(307, 'https://www.paypal.com/cgi-bin/webscr?custom=' + newContribution.id);
+									res.redirect(307, 'https://ipnpb.paypal.com/cgi-bin/webscr?custom=' + newContribution.id);
 								} else {
 									var newContribution = new Contribution({
 										contributor: req.user.id,
