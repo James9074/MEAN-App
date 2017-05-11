@@ -7,8 +7,8 @@ hooks:
   BeforeInstall:
     - location: foreverStop.sh
       timeout: 300
-      runas: root
+      runas: ubuntu
   ApplicationStart:
     - location: foreverStart.sh
       timeout: 300
-      runas: root
+      runas: ubuntu
