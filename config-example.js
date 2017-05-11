@@ -7,6 +7,7 @@ var config = {
     emailService: 'gmail',
     sessionKey: 'example key',
     siteAdmins: ['example1@gmail.com', 'example2@gmail.com'], //Array of email addresses -- MUST BE LOWERCASE
+    paypalEmail: 'example@example.com',
 }
 
 module.exports = config;

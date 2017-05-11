@@ -439,6 +439,7 @@ router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, r
 							isSubscriber: isSubscriber(org, req.user),
 							monetaryNeed: (need.needType == "monetary"),
 							need: need,
+							paypalEmail: Config.paypalEmail,
 							fullURL: req.protocol + '://' + req.get('host') + req.originalUrl,
 						});
 					} else {
