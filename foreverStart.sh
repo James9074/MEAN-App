@@ -1,5 +1,3 @@
-cd ~
-
 cd MEAN-App
 
 #start the node service

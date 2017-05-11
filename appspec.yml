@@ -6,5 +6,9 @@ files:
 hooks:
   BeforeInstall:
     - location: foreverStop.sh
+      timeout: 300
+      runas: root
   ApplicationStart:
     - location: foreverStart.sh
+      timeout: 300
+      runas: root
