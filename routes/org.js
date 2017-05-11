@@ -526,6 +526,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									need.contributions.push(newContribution.id);
 									need.save();
 
+									res.header('User-Agent','FaithByDeeds');
 									res.redirect(307, 'https://www.paypal.com/cgi-bin/webscr?custom=' + newContribution.id);
 								} else {
 									var newContribution = new Contribution({
