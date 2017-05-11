@@ -1,5 +1,4 @@
-sudo su
-
+cd \
 cd home/ubuntu/MEAN-App
 
 #start the node service
