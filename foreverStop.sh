@@ -1,1 +1,2 @@
-sudo forever stopAll
+#stop the service
+sudo forever stopall
