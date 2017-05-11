@@ -3,3 +3,8 @@ os: linux
 files:
    - source: /
      destination: /home/ubuntu/MEAN-App
+hooks:
+  BeforeInstall:
+    - location: foreverStop.sh
+  ApplicationStart:
+    - location: foreverStart.sh
