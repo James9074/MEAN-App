@@ -440,7 +440,7 @@ router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, r
 							monetaryNeed: (need.needType == "monetary"),
 							need: need,
 							paypalEmail: Config.paypalEmail,
-							fullURL: req.protocol + '://' + req.get('host') + '/' + org.shortPath + '/needs',
+							fullURL: req.protocol + '://' + req.get('host') + '/org/' + org.shortPath + '/needs',
 						});
 					} else {
 						res.redirect('/org/' + org.shortPath + '/needs');
