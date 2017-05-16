@@ -1,0 +1,39 @@
+<h2 style="margin-bottom:30px;">{{pageHeader}}</h2>
+{{#if errors}}
+	{{#each errors}}
+		<div class="alert alert-danger">{{msg}}</div>
+	{{/each}}
+{{/if}}
+{{#if error}}
+	<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<div class="row" style="text-align:center;">
+    {{#each organizations}}
+        <div class="col-xs-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <a href="/org/{{this.shortPath}}"><h1 class="panel-title">{{this.name}}</h1></a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="margin-bottom">
+                        Created by {{this.admin.firstName}} {{this.admin.lastName}}<br>
+                        on {{formatTime this.createdAt "MMM DD, YYYY"}}<br>
+                    </div>
+                    {{#if this.admin.avatar}}
+                        <img src="/uploads/{{this.admin.avatar.fileName}}" class="img img-circle margin-bottom" height="80px" width="80px" style="border: solid 1px #ccc;"/>
+                    {{else}}
+                        <img src="/images/no-avatar.png" class="img img-circle margin-bottmo" height="80px" width="80px" style="border: solid 1px #ccc;"/>		
+                    {{/if}}
+                    <br><span class="badge">{{this.subscribers.length}} Subscriber(s)</span>
+                </div>
+            </div>
+        </div>
+
+    {{else}}
+		<div class="col-xs-12"><strong>There are no organizations at this time.</strong></div>       
+    {{/each}}
+    
+</div>

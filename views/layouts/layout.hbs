@@ -7,18 +7,28 @@
   </head>
   <body>
   	<div class="container fill">
-	  	<div class="row">
+	  	<div class="row no-margin">
 			<div class="col-xs-5">
 				<a href="/"><img id="mainImage" src="/images/logo-main.png" class="img img-responsive"></a>
 			</div>
+			<div class="col-xs-5"></div>
+			<div class="col-xs-2" style="margin-top:30px;">
+				{{#if isSiteAdmin}}
+					<button type="button" class="btn alt-btn dropdown-toggle" data-toggle="dropdown">Admin <span class="caret"></span></button>
+					<ul class="dropdown-menu">
+						<li><a href="/donation-rept">Donation Report</a></li>
+						<li><a href="/organizations">Organizations</a></li>						
+					</ul>
+				{{/if}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-5"></div>
 			<div class="col-xs-7" id="menu">
 					<a class="menu-item" id="aboutMenuItem" href="/about">About</a>
 					<a class="menu-item" id="faqMenuItem" href="/faq">FAQ</a>					
 				{{#if user}}
 					<a class="menu-item" id="dashboardMenuItem" href="/dashboard">Dashboard</a>
-					{{#if isSiteAdmin}}
-						<a class="menu-item" id="adminMenuItem" href="/donation-rept">Admin</a>
-					{{/if}}
 					<a class="menu-item" id="logoutMenuItem" href="/logout">Logout</a>
 				{{else}}
 					<a class="menu-item" id="loginMenuItem" href="/login">Login</a>
@@ -99,10 +109,6 @@
 	.sidebar {
 		margin-top: 20px;
 	}
-	#menu {
-		margin-top: 135px;
-		margin-bottom: 25px;
-	}
 	#menu a {
 		color: #555555;
 		font-size: 22px;
@@ -127,6 +133,9 @@
 	}
 	.row {
 		margin-bottom: 10px;
+	}
+	.no-margin {
+		margin: 0px;
 	}
 	.btn, .btn:hover, .btn:focus, .btn:active {
 		color: #fff;

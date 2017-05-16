@@ -85,27 +85,28 @@ function ensureSiteAdmin(req, res, next){
 }
 
 function isSiteAdmin(user) {
-	return (Config.siteAdmins.indexOf(user.email) != -1);
+	if (user) return (Config.siteAdmins.indexOf(user.email) != -1);
+	return false;
 }
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('base/index', {layout: 'layouts/layout', title: 'Home | FaithByDeeds'});
+	res.render('base/index', {layout: 'layouts/layout', title: 'Home | FaithByDeeds', isSiteAdmin: isSiteAdmin(req.user),});
 });
 
 /* GET about page */
 router.get('/about', function(req, res, next) {
-	res.render('base/about', {layout: 'layouts/layout', title: 'About | FaithByDeeds'});
+	res.render('base/about', {layout: 'layouts/layout', title: 'About | FaithByDeeds', isSiteAdmin: isSiteAdmin(req.user)});
 });
 
 /* GET FAQ page */
 router.get('/faq', function(req, res, next) {
-	res.render('base/faq', {layout: 'layouts/layout', title: 'FAQ | FaithByDeeds'});
+	res.render('base/faq', {layout: 'layouts/layout', title: 'FAQ | FaithByDeeds', isSiteAdmin: isSiteAdmin(req.user)});
 });
 
 /* GET terms */
 router.get('/terms', function(req, res, next) {
-	res.render('base/terms', {layout: 'layouts/layout', title: 'Terms of Service | FaithByDeeds'});
+	res.render('base/terms', {layout: 'layouts/layout', title: 'Terms of Service | FaithByDeeds', isSiteAdmin: isSiteAdmin(req.user)});
 });
 
 /* GET logout */
@@ -128,7 +129,6 @@ router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req,
 	Contribution.find({"createdAt": {"$gte": beginning, "$lt": ending}}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
 		res.render('base/donationRept', {layout: 'layouts/layout', 
 			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report', 
-			activeMenuItem: 'adminMenuItem',
 			isSiteAdmin: isSiteAdmin(req.user),
 			nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),			
 			monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
@@ -138,6 +138,18 @@ router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req,
 	})
 });
 
+/* GET organizations */
+router.get('/organizations', ensureAuthenticated, ensureSiteAdmin, function(req, res, next) {
+	
+	Organization.find({}).populate('admin').exec(function(err, organizations){
+		if (err) throw err;
+		res.render('base/organizations', {layout: 'layouts/layout', 
+			title: 'Organizations | FaithByDeeds', pageHeader: 'Organizations', 
+			isSiteAdmin: isSiteAdmin(req.user),
+			organizations: organizations,
+		});
+	})
+});
 
 /* GET and POST to dashboard */
 router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
@@ -189,6 +201,7 @@ router.get('/register', function(req, res, next) {
 		title: 'Registration | FaithByDeeds', 
 		pageHeader: 'Register',
 		activeMenuItem: 'registerMenuItem',
+		isSiteAdmin: isSiteAdmin(req.user),
 	});
 });
 
@@ -235,6 +248,7 @@ router.post('/register', function(req, res, next){
 							title: 'Registration',
 							pageHeader: 'Register',
 							errors: result.useFirstErrorOnly().array(),
+							isSiteAdmin: isSiteAdmin(req.user),	
 						});
 					} else {
 						var newUser = new User({
@@ -422,7 +436,7 @@ router.post('/reset/:token', function(req, res) {
 
 /* GET and POST to org-create */
 router.get('/org-create', ensureAuthenticated, function(req, res, next){
-	res.render('base/org-create', {layout: 'layouts/layout', title: 'Create Organization | FaithByDeeds', pageHeader: 'Create Organization', });
+	res.render('base/org-create', {layout: 'layouts/layout', title: 'Create Organization | FaithByDeeds', pageHeader: 'Create Organization', isSiteAdmin: isSiteAdmin(req.user),});
 });
 
 router.post('/org-create', ensureAuthenticated, function(req, res, next){
@@ -454,7 +468,8 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 				layout: 'layouts/layout',
 				title: 'Create Organization | FaithByDeeds',
 				pageHeader: 'Create Organization',
-				errors: result.useFirstErrorOnly().array()
+				errors: result.useFirstErrorOnly().array(),
+				isSiteAdmin: isSiteAdmin(req.user),
 			});
 		} else {
 			var newOrganization = new Organization({
