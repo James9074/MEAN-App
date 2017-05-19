@@ -21,7 +21,11 @@ mongoose.Promise = require('bluebird');
 // connect to our database
 
 /* LOCAL and Heroku Development*/
-var db = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/FaithByDeeds');
+var dbOptions = {
+    user: Config.dbUser,
+    pass: Config.dbPass,
+}
+var db = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/FaithByDeeds', dbOptions);
 
 var Organization = require('./models/organization');
 var User = require('./models/user');
