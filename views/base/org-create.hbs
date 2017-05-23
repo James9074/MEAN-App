@@ -16,7 +16,7 @@
 					<label for="orgName">Organization name:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="orgName" name="orgName" type="text">
+					<input class="form-control" id="orgName" name="orgName" type="text" value="{{params.orgName}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -32,7 +32,7 @@
 					<label for="address">Address: <a data-toggle="tooltip" title="The physical address of the organization.">?</a></label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="address" name="address" type="text">
+					<input class="form-control" id="address" name="address" type="text" value="{{params.address}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -40,7 +40,7 @@
 					<label for="city">City:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="city" name="city" type="text">
+					<input class="form-control" id="city" name="city" type="text" value="{{params.city}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -48,7 +48,7 @@
 					<label for="state">State:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="state" name="state" type="text">
+					<input class="form-control" id="state" name="state" type="text" value="{{params.state}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -56,7 +56,7 @@
 					<label for="zip">Zip:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="zip" name="zip" type="text">
+					<input class="form-control" id="zip" name="zip" type="text" value="{{params.zip}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -64,7 +64,7 @@
 					<label for="short">Short path: <a data-toggle="tooltip" title="This is a unique identifier for accessing the site. I.E. www.faithbydeeds.com/org/shortPath">?</a></label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="short" name="short" type="text">
+					<input class="form-control" id="short" name="short" type="text" value="{{params.short}}">
 				</div>
 			</div>
 			<div class="form-group row">
@@ -73,8 +73,8 @@
 				</div>
 				<div class="col-xs-7">
 				  	<select class="form-control" id="payment" name="payment">
-					    <option value="check">Check</option>
-					    <option value="paypal">Paypal</option>
+					    <option value="check" {{selected "check" params.payment}}>Check</option>
+					    <option value="paypal" {{selected "paypal" params.payment}}>Paypal</option>
 				 	</select>
 				</div>
 			</div>

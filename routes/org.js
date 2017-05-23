@@ -257,70 +257,6 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 	});
 });
 
-/* GET the needs archive */
-router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
-
-	Organization.findOne({shortPath: req.params.name}).populate('admin departments').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
-		if (err) throw err;
-		if (org){
-
-			if (isAdmin(org, req.user)) {
-
-				var needs = org.needs;
-				
-				//Only show archived needs - not public
-				needs = _.filter(needs, function(o){ return (o.status == "archived")});
-
-				if (req.query.publish) {
-					needs = _.filter(needs, function(o){ return (o._id == req.query.publish)});
-					if (needs.length == 1) {
-						needs[0].status = "public";
-						needs[0].save();
-						req.flash('success_msg', 'The need was published.');
-						res.redirect('/org/' + org.shortPath + '/needs');
-					} else {
-						req.flash('error', 'There was a problem processing the request.');
-						res.redirect('/org/' + org.shortPath + '/needs');					
-					}
-				} else {
-			
-					//Filter by department
-					if(req.query.department){
-						needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
-					}
-
-					//Filter by search term
-					if (req.query.search){
-						needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
-					}
-
-					//Sort
-					needs = _.sortBy(needs, "createdAt").reverse();
-					if (req.query.sortBy){
-						if (req.query.sortBy == "oldest") needs.reverse();
-					}
-
-					res.render('org/orgArchive', {layout: 'layouts/orgLayout',
-						user: req.user,
-						title: org.name, 
-						org: org, 
-						pageHeader: 'Archive', 
-						isAdmin: true, 
-						isSubscriber: true,
-						isAdvocate: true,
-						needs: needs,
-						query: req.query,
-					});
-				}				
-			} else {
-				res.redirect('/org/' + org.shortPath + '/needs');				
-			}
-		} else {
-			next();
-		}	
-	});
-});
-
 router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 
 	Organization.findOne({shortPath: req.params.name}).populate('admin departments').exec(function(err, org){
@@ -354,7 +290,8 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 							pageHeader: 'Add Need', 
 							isAdmin: isAdmin(org, req.user),
 							isSubscriber: isSubscriber(org, req.user),
-							errors: result.useFirstErrorOnly().array(),	
+							errors: result.useFirstErrorOnly().array(),
+							params: req.body,	
 						});						
 					} else {
 						//Make sure that the specified department exists and has the user listed as advocate
@@ -417,6 +354,70 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 		}
 	});	
 
+});
+
+/* GET the needs archive */
+router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
+
+	Organization.findOne({shortPath: req.params.name}).populate('admin departments').populate({path: 'needs', populate: {path: 'creator department'}}).exec(function(err, org){
+		if (err) throw err;
+		if (org){
+
+			if (isAdmin(org, req.user)) {
+
+				var needs = org.needs;
+				
+				//Only show archived needs - not public
+				needs = _.filter(needs, function(o){ return (o.status == "archived")});
+
+				if (req.query.publish) {
+					needs = _.filter(needs, function(o){ return (o._id == req.query.publish)});
+					if (needs.length == 1) {
+						needs[0].status = "public";
+						needs[0].save();
+						req.flash('success_msg', 'The need was published.');
+						res.redirect('/org/' + org.shortPath + '/needs');
+					} else {
+						req.flash('error', 'There was a problem processing the request.');
+						res.redirect('/org/' + org.shortPath + '/needs');					
+					}
+				} else {
+			
+					//Filter by department
+					if(req.query.department){
+						needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
+					}
+
+					//Filter by search term
+					if (req.query.search){
+						needs = _.filter(needs, function(o){ return (o.title.toLowerCase().indexOf(req.query.search.toLowerCase()) != -1)});
+					}
+
+					//Sort
+					needs = _.sortBy(needs, "createdAt").reverse();
+					if (req.query.sortBy){
+						if (req.query.sortBy == "oldest") needs.reverse();
+					}
+
+					res.render('org/orgArchive', {layout: 'layouts/orgLayout',
+						user: req.user,
+						title: org.name, 
+						org: org, 
+						pageHeader: 'Archive', 
+						isAdmin: true, 
+						isSubscriber: true,
+						isAdvocate: true,
+						needs: needs,
+						query: req.query,
+					});
+				}				
+			} else {
+				res.redirect('/org/' + org.shortPath + '/needs');				
+			}
+		} else {
+			next();
+		}	
+	});
 });
 
 /* GET and POST to needs/contribute */
@@ -503,7 +504,8 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									isSubscriber: isSubscriber(org, req.user),
 									monetaryNeed: (need.needType == "monetary"),
 									need: need,
-									errors: result.useFirstErrorOnly().array(),	
+									errors: result.useFirstErrorOnly().array(),
+									params: req.body,	
 								});						
 							} else {
 								//If monetary, we redirect this to paypal.com

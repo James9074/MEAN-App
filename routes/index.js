@@ -209,8 +209,16 @@ router.post('/register', function(req, res, next){
  
 	// if its blank or null means user has not selected the captcha, so return the error.
 	if(req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
-		req.flash('error', 'You must select the captcha to verify that you are not a robot.');
-		res.redirect('/register');
+
+		return res.render('base/register', {
+			error: 'You must select the captcha to verify that you are not a robot.',
+			layout: 'layouts/layout',
+			title: 'Registration',
+			pageHeader: 'Register',
+			isSiteAdmin: isSiteAdmin(req.user),
+			params: req.body,	
+		});
+
 	} else {
 		var secretKey = "6LcC4B4UAAAAAI91rdS6S-HAep67XE4k1yBhO-qy";
 
@@ -221,8 +229,16 @@ router.post('/register', function(req, res, next){
 			body = JSON.parse(body);
 			// Success will be true or false depending upon captcha validation.
 			if(body.success !== undefined && !body.success) {
-				req.flash('error', 'The captcha verification failed.');
-				return res.redirect('/register');
+
+				return res.render('base/register', {
+					error: 'The captcha verification failed.',
+					layout: 'layouts/layout',
+					title: 'Registration',
+					pageHeader: 'Register',
+					isSiteAdmin: isSiteAdmin(req.user),
+					params: req.body,	
+				});
+
 			} else{
 				//Success
 				var firstName = req.body.firstName;
@@ -248,7 +264,8 @@ router.post('/register', function(req, res, next){
 							title: 'Registration',
 							pageHeader: 'Register',
 							errors: result.useFirstErrorOnly().array(),
-							isSiteAdmin: isSiteAdmin(req.user),	
+							isSiteAdmin: isSiteAdmin(req.user),
+							params: req.body,	
 						});
 					} else {
 						var newUser = new User({
@@ -270,8 +287,14 @@ router.post('/register', function(req, res, next){
 									return res.redirect('/login');
 								});				
 							} else {
-								req.flash('error', 'Email already in use.');
-								return res.redirect('/register');
+								return res.render('base/register', {
+									error: 'Email already in use.',
+									layout: 'layouts/layout',
+									title: 'Registration',
+									pageHeader: 'Register',
+									isSiteAdmin: isSiteAdmin(req.user),
+									params: req.body,	
+								});
 							}
 						});
 
@@ -470,6 +493,7 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 				pageHeader: 'Create Organization',
 				errors: result.useFirstErrorOnly().array(),
 				isSiteAdmin: isSiteAdmin(req.user),
+				params: req.body,
 			});
 		} else {
 			var newOrganization = new Organization({
@@ -504,11 +528,23 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 
 			Organization.createOrganization(newOrganization, function(err, org){
 				if ( err && err.code === 11000 ) {
-					req.flash('error', 'Short path already in use.');
-					res.redirect('/org-create');
+					res.render('base/org-create', {
+						layout: 'layouts/layout',
+						error: 'Short path already in use.',
+						title: 'Create Organization | FaithByDeeds',
+						pageHeader: 'Create Organization',
+						isSiteAdmin: isSiteAdmin(req.user),
+						params: req.body,
+					});
 				} else if (err){
-					req.flash('error', 'Oops. An error occurred.');
-					res.redirect('/org-create');			
+					res.render('base/org-create', {
+						layout: 'layouts/layout',
+						error: 'Oops. An error occurred.',
+						title: 'Create Organization | FaithByDeeds',
+						pageHeader: 'Create Organization',
+						isSiteAdmin: isSiteAdmin(req.user),
+						params: req.body,
+					});			
 				} else {
 
 					/* Send email */

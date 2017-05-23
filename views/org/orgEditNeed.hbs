@@ -15,7 +15,11 @@
 					<label for="needTitle">Need Title:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="needTitle" name="needTitle" type="text" value="{{need.title}}">
+					{{#if need}}
+						<input class="form-control" id="needTitle" name="needTitle" type="text" value="{{need.title}}">
+					{{else}}
+						<input class="form-control" id="needTitle" name="needTitle" type="text" value="{{params.needTitle}}">					
+					{{/if}}
 				</div>
 			</div>
 			<div class="form-group row">
@@ -23,7 +27,11 @@
 					<label for="needTitle">Quantity/Amount($):</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control" id="amount" name="amount" type="text" value="{{need.goalAmount}}">
+					{{#if need}}
+						<input class="form-control" id="amount" name="amount" type="text" value="{{need.goalAmount}}">
+					{{else}}
+						<input class="form-control" id="amount" name="amount" type="text" value="{{params.amount}}">					
+					{{/if}}
 				</div>
 			</div>
 			<div class="form-group row">
@@ -32,8 +40,13 @@
 				</div>
 				<div class="col-xs-7">
 					<select class="form-control" id="needType" name="needType">
-						<option value="monetary" {{selected need.needType "monetary"}}>Monetary</option>
-						<option value="non-monetary" {{selected need.needType "non-monetary"}}>Non-monetary</option>
+						{{#if need}}
+							<option value="monetary" {{selected need.needType "monetary"}}>Monetary</option>
+							<option value="non-monetary" {{selected need.needType "non-monetary"}}>Non-monetary</option>
+						{{else}}
+							<option value="monetary" {{selected params.needType "monetary"}}>Monetary</option>
+							<option value="non-monetary" {{selected params.needType "non-monetary"}}>Non-monetary</option>							
+						{{/if}}
 					</select>
 				</div>
 			</div>
@@ -45,7 +58,11 @@
 					<select class="form-control" id="department" name="department">
 						
 						{{#each org.departments}}
-							{{#if (isAdvocateOfDepartment this ../user)}}<option value="{{this.id}}" {{selected ../need.department.id this.id}}>{{this.departmentName}}</option>{{/if}}
+							{{#if ../need}}
+								{{#if (isAdvocateOfDepartment this ../user)}}<option value="{{this.id}}" {{selected ../need.department.id this.id}}>{{this.departmentName}}</option>{{/if}}
+							{{else}}
+								{{#if (isAdvocateOfDepartment this ../user)}}<option value="{{this.id}}" {{selected ../params.department this.id}}>{{this.departmentName}}</option>{{/if}}
+							{{/if}}
 						{{/each}}
 					</select>
 				</div>
@@ -55,7 +72,11 @@
 					<label for="needDate">Needed By:</label>
 				</div>
 				<div class="col-xs-7">
-					<input class="form-control datepicker" id="needDate" type="text" name="needDate" value="{{formatTime need.needDate "MM/DD/YYYY"}}"/>
+					{{#if need}}
+						<input class="form-control datepicker" id="needDate" type="text" name="needDate" value="{{formatTime need.needDate "MM/DD/YYYY"}}"/>
+					{{else}}
+						<input class="form-control datepicker" id="needDate" type="text" name="needDate" value="{{formatTime params.needDate "MM/DD/YYYY"}}"/>
+					{{/if}}
 				</div>
 			</div>
 		</div>
@@ -65,7 +86,11 @@
 					<label for="primaryColor">Description:</label>
 				</div>
 				<div class="col-xs-8">
-					<textarea class="form-control" id="description" name="description" rows="6" maxlength="400">{{need.description}}</textarea>
+					{{#if need}}
+						<textarea class="form-control" id="description" name="description" rows="6" maxlength="400">{{need.description}}</textarea>
+					{{else}}
+						<textarea class="form-control" id="description" name="description" rows="6" maxlength="400">{{params.description}}</textarea>
+					{{/if}}
 				</div>
 			</div>
 			<div class="form-group row">
