@@ -272,9 +272,15 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 				var needDate = req.body.needDate;
 				var description = req.body.description;
 
+				if (needType == "monetary") {
+					amount = parseFloat(amount).toFixed(2);
+				} else {
+					amount = Math.trunc(amount);
+				}
+
 				//Validation
 				req.assert('needTitle', 'Need title is a required field.').notEmpty();
-				req.assert('amount', 'Quantity or Amount must be a positive number').isInt({min: 0});
+				req.assert('amount', 'Quantity or Amount can not be negative.').isFloat({min: 0});
 				req.assert('needType', 'Need type is a required field').notEmpty();
 				req.assert('department', 'Department is a required field.').notEmpty();
 				req.assert('needDate', 'Needed by must be a valid date.').isDate();
@@ -483,7 +489,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 
 						//Form validation
 						req.assert('donationAmount', 'The donation amount is required.').notEmpty();
-						req.assert('donationAmount', 'The donation amount must be a number.').isFloat();
+						req.assert('donationAmount', 'The donation amount must be a positive number.').isFloat({gt: 0});
 						req.assert('comments', 'The comments field should be no more than 400 characters.').isLength(0, 400);
 						req.assert('publicName', 'The contribute as name must be no more than 50 characters.').isLength(0, 50);
 						
@@ -633,9 +639,15 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 						var needDate = req.body.needDate;
 						var description = req.body.description;
 
+						if (needType == "monetary") {
+							amount = parseFloat(amount).toFixed(2);
+						} else {
+							amount = Math.trunc(amount);
+						}
+
 						//Validation
 						req.assert('needTitle', 'Need title is a required field.').notEmpty();
-						req.assert('amount', 'Quantity or Amount must be a positive number').isInt({min: 0});
+						req.assert('amount', 'Quantity or Amount can not be negative.').isFloat({min: 0});
 						req.assert('needType', 'Need type is a required field').notEmpty();
 						req.assert('department', 'Department is a required field.').notEmpty();
 						req.assert('needDate', 'Needed by must be a valid date.').isDate();
