@@ -28,7 +28,11 @@
 				</div>
 				<div class="col-xs-7">
 					{{#if need}}
-						<input class="form-control" id="amount" name="amount" type="text" value="{{need.goalAmount}}">
+						{{#if (isMonetary need.needType)}}
+							<input class="form-control" id="amount" name="amount" type="text" value="{{formatCurrency need.goalAmount}}">
+						{{else}}
+							<input class="form-control" id="amount" name="amount" type="text" value="{{need.goalAmount}}">
+						{{/if}}
 					{{else}}
 						<input class="form-control" id="amount" name="amount" type="text" value="{{params.amount}}">					
 					{{/if}}
