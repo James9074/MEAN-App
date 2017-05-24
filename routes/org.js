@@ -554,8 +554,8 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									need.save();
 
 									/* Send email to contributor and org admin */
-									var msg = "Hello,\n\nYou have pledged to contribute" + donationAmount + " of the needed items to the need '" + need.title + "'. The expected delivery date is " + pledgeDate + "."
-										+ "\n\nOnce the items have been delivered and the donation status has been updated, the donation will appear on the site. \n\nThank you so much!\n\nOrganization address:\n\n" + org.address + "\n" + org.city + "\n" + org.state + "\n" + org.zip;
+									var msg = "Hello " + req.user.firstName + ",\n\nYou have pledged to contribute " + donationAmount + " of the needed items to the need '" + need.title + "'. The expected delivery date is " + pledgeDate + "."
+										+ "\n\nOnce the items have been delivered and the donation status has been updated, the donation will appear on the site. \n\nThank you so much!\n\nOrganization address:\n\n" + org.address + "\n" + org.city + ", " + org.state + " " + org.zip;
 									var subject = "FaithByDeeds - You've just made a pledge!";
 									sendEmail(subject, msg, req.user.email);									
 
