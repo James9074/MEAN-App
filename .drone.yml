@@ -16,6 +16,7 @@ pipeline:
   app:
     image: sstine93/dind
     commands:
+      - docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
       - docker build -t app -f app/Dockerfile --build-arg GIT_COMMIT=${DRONE_COMMIT_SHA:0:8} ./app
       - docker tag app ${APP_REPO}:latest
       - docker tag app ${APP_REPO}:${DRONE_COMMIT_SHA:0:8}
