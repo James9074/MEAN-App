@@ -1,0 +1,76 @@
+services:
+  mongo:
+    image: mongo:3.4.1
+
+# Main build pipeline
+pipeline:
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./app/node_modules
+    volumes:
+      - /tmp/cache:/cache
+
+## APP image build
+  app:
+    image: sstine93/dind
+    commands:
+      - docker build -t app -f app/Dockerfile --build-arg GIT_COMMIT=${DRONE_COMMIT_SHA:0:8} ./app
+      - docker tag app ${APP_REPO}:latest
+      - docker tag app ${APP_REPO}:${DRONE_COMMIT_SHA:0:8}
+      - docker tag app ${APP_REPO}:${DRONE_BRANCH}
+      - docker push ${APP_REPO}:latest
+      - docker push ${APP_REPO}:${DRONE_COMMIT_SHA:0:8}
+      - docker push ${APP_REPO}:${DRONE_BRANCH}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker:/root/.docker
+    when:
+        branch: [master, develop]
+
+## Deplyoment - Rancher Prod
+
+  prod-app:
+    image: sstine93/drone-rancher
+    url: ${RANCHER_URL}
+    access_key: ${RANCHER_ACCESS_KEY}
+    secret_key: ${RANCHER_SECRET_KEY}
+    service: faithbydeeds/app
+    docker_image: ${APP_REPO}:${DRONE_COMMIT_SHA:0:8}
+    confirm: false
+    timeout: 500
+    when:
+      branch: master
+## Notifications
+
+  # Notifications of develop/master branch builds
+  notify:
+    image: plugins/slack-blame
+    channel: fbd-cicd
+    success_template: |
+      Build of {{build.branch}} completed successfully. Thanks, @{{build.author}} - <https://drone.wlan1.net/james9074/faithbydeeds/{{build.number}}|View build logs>
+    failure_template: |
+      The {{build.branch}} build is broken! Blame @{{build.author}} - <https://drone.wlan1.net/james9074/faithbydeeds/{{build.number}}|View build logs>
+    failure_image_attachments:
+      - "https://www.targetprocess.com/content/uploads/2012/12/finger-pointing.png"
+      - "https://wiki.jenkins-ci.org/download/attachments/60916342/16116996.jpg?version=1&modificationDate=1332845378000"
+      - "http://www.troll.me/images/chris-rock/i-dont-always-break-the-build-but-when-i-do-i-blame-it-on-you-thumb.jpg"
+      - "http://s.quickmeme.com/img/56/56c3385f01e15f1b024fcc0932ac7d2b88e100d1d6705a154a55351a129749ac.jpg"
+      - "https://s-media-cache-ak0.pinimg.com/originals/03/fb/80/03fb805be78f2c5feab567911d7dd487.jpg"
+      - "http://www.kappit.com/img/pics/201601_2007_iacac_sm.jpg"
+      - "http://www.kappit.com/img/pics/201601_2006_dfife_sm.jpg"
+    token: ${SLACK_TOKEN}
+    mapping: {"james9074@gmail.com":"james"}
+    when:
+        branch: [ develop, master ]
+        event: [ push, tag, deployment, pull_request ]
+        status: [ success, failure ]
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./app/node_modules
+    volumes:
+      - /tmp/cache:/cache

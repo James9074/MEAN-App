@@ -18,6 +18,8 @@ var Config = require('../config.js');
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
     service: Config.emailService,
+    host: Config.emailHost,
+    port: Config.emailPort,
     auth: {
         user: Config.emailUser,
         pass: Config.emailPass,
@@ -114,9 +116,9 @@ var isAdvocateforOrgPopped = function (org, user) { //Only if the advocates have
 	if (!user) return false;
 
 	var depts = _.filter(org.departments, function(o){
-	
+
 		var adv = _.filter(o.advocates, function(u){
-			return (u.id == user.id); 
+			return (u.id == user.id);
 		})
 		 return (adv.length > 0);
 	});
@@ -135,8 +137,8 @@ router.get('/:name', function(req, res, next) {
 				if (err) throw err;
 				var panels = 4; //The number of panels per slide set
 				res.render('org/orgIndex', {layout: 'layouts/orgLayout',
-					title: org.name, 
-					org: org, 
+					title: org.name,
+					org: org,
 					isAdmin: isAdmin(org, req.user),
 					isSubscriber: isSubscriber(org, req.user),
 					activeMenuItem: 'homeMenuItem',
@@ -147,7 +149,7 @@ router.get('/:name', function(req, res, next) {
 			});
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -182,7 +184,7 @@ router.get('/:name/needs', function(req, res, next) {
 		if (org){
 
 			var needs = org.needs;
-			
+
 			//Only show public needs - not archived
 			needs = _.filter(needs, function(o){ return (o.status == "public")});
 
@@ -195,7 +197,7 @@ router.get('/:name/needs', function(req, res, next) {
 					res.redirect('/org/' + org.shortPath + '/needs');
 				} else {
 					req.flash('error', 'There was a problem processing the request.');
-					res.redirect('/org/' + org.shortPath + '/needs');					
+					res.redirect('/org/' + org.shortPath + '/needs');
 				}
 			} else {
 				//Filter by department
@@ -216,20 +218,20 @@ router.get('/:name/needs', function(req, res, next) {
 
 				res.render('org/orgNeeds', {layout: 'layouts/orgLayout',
 					user: req.user,
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Needs', 
-					isAdmin: isAdmin(org, req.user), 
+					title: org.name,
+					org: org,
+					pageHeader: 'Needs',
+					isAdmin: isAdmin(org, req.user),
 					isSubscriber: isSubscriber(org, req.user),
 					isAdvocate: isAdvocateforOrg(org, req.user),
 					activeMenuItem: 'needsMenuItem',
 					needs: needs,
 					query: req.query,
-				});				
+				});
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -242,10 +244,10 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 			if (isAdvocateforOrg(org, req.user)) {
 				res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 					user: req.user,
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Add Need', 
-					isAdmin: isAdmin(org, req.user), 
+					title: org.name,
+					org: org,
+					pageHeader: 'Add Need',
+					isAdmin: isAdmin(org, req.user),
 					isSubscriber: isSubscriber(org, req.user),
 				});
 			} else {
@@ -253,7 +255,7 @@ router.get('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -291,14 +293,14 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 					if (!result.isEmpty()){
 						res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 							user: req.user,
-							title: org.name, 
-							org: org, 
-							pageHeader: 'Add Need', 
+							title: org.name,
+							org: org,
+							pageHeader: 'Add Need',
 							isAdmin: isAdmin(org, req.user),
 							isSubscriber: isSubscriber(org, req.user),
 							errors: result.useFirstErrorOnly().array(),
-							params: req.body,	
-						});						
+							params: req.body,
+						});
 					} else {
 						//Make sure that the specified department exists and has the user listed as advocate
 						var deptArray = []; //The list of depts the user is an advocate for
@@ -358,7 +360,7 @@ router.post('/:name/needs/new', ensureAuthenticated, function(req, res, next) {
 		} else {
 			next();
 		}
-	});	
+	});
 
 });
 
@@ -372,7 +374,7 @@ router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
 			if (isAdmin(org, req.user)) {
 
 				var needs = org.needs;
-				
+
 				//Only show archived needs - not public
 				needs = _.filter(needs, function(o){ return (o.status == "archived")});
 
@@ -385,10 +387,10 @@ router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
 						res.redirect('/org/' + org.shortPath + '/needs');
 					} else {
 						req.flash('error', 'There was a problem processing the request.');
-						res.redirect('/org/' + org.shortPath + '/needs');					
+						res.redirect('/org/' + org.shortPath + '/needs');
 					}
 				} else {
-			
+
 					//Filter by department
 					if(req.query.department){
 						needs = _.filter(needs, function(o){ return (o.department.departmentName == req.query.department)});
@@ -407,22 +409,22 @@ router.get('/:name/archive', ensureAuthenticated, function(req, res, next) {
 
 					res.render('org/orgArchive', {layout: 'layouts/orgLayout',
 						user: req.user,
-						title: org.name, 
-						org: org, 
-						pageHeader: 'Archive', 
-						isAdmin: true, 
+						title: org.name,
+						org: org,
+						pageHeader: 'Archive',
+						isAdmin: true,
 						isSubscriber: true,
 						isAdvocate: true,
 						needs: needs,
 						query: req.query,
 					});
-				}				
+				}
 			} else {
-				res.redirect('/org/' + org.shortPath + '/needs');				
+				res.redirect('/org/' + org.shortPath + '/needs');
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -439,10 +441,10 @@ router.get('/:name/needs/contribute/:need', ensureAuthenticated, function(req, r
 					if (isSubscriber(org, req.user)) {
 						res.render('org/orgContribute', {layout: 'layouts/orgLayout',
 							user: req.user,
-							title: org.name, 
-							org: org, 
-							pageHeader: 'Contribute', 
-							isAdmin: isAdmin(org, req.user), 
+							title: org.name,
+							org: org,
+							pageHeader: 'Contribute',
+							isAdmin: isAdmin(org, req.user),
 							isSubscriber: isSubscriber(org, req.user),
 							monetaryNeed: (need.needType == "monetary"),
 							need: need,
@@ -474,7 +476,7 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 				if (err) throw err;
 				if (need){
 					if (isSubscriber(org, req.user)) {
-						
+
 						//Grab req.body variables
 						var donationAmount = req.body.donationAmount;
 						var comments = req.body.comments;
@@ -492,9 +494,9 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 						req.assert('donationAmount', 'The donation amount must be a positive number.').isFloat({gt: 0});
 						req.assert('comments', 'The comments field should be no more than 400 characters.').isLength(0, 400);
 						req.assert('publicName', 'The contribute as name must be no more than 50 characters.').isLength(0, 50);
-						
+
 						if (!(need.needType == "monetary")) {
-							req.assert('pledgeDate', 'The delivery estimate is required.').notEmpty();							
+							req.assert('pledgeDate', 'The delivery estimate is required.').notEmpty();
 							req.assert('pledgeDate', 'The delivery estimate must be a valid date.').isDate();
 							req.assert('pledgeDate', 'The delivery estimate must be later than today.').isAfter();
 						}
@@ -503,16 +505,16 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 							if (!result.isEmpty()){
 								res.render('org/orgContribute', {layout: 'layouts/orgLayout',
 									user: req.user,
-									title: org.name, 
-									org: org, 
-									pageHeader: 'Contribute', 
-									isAdmin: isAdmin(org, req.user), 
+									title: org.name,
+									org: org,
+									pageHeader: 'Contribute',
+									isAdmin: isAdmin(org, req.user),
 									isSubscriber: isSubscriber(org, req.user),
 									monetaryNeed: (need.needType == "monetary"),
 									need: need,
 									errors: result.useFirstErrorOnly().array(),
-									params: req.body,	
-								});						
+									params: req.body,
+								});
 							} else {
 								//If monetary, we redirect this to paypal.com
 								if (need.needType == 'monetary'){
@@ -557,12 +559,12 @@ router.post('/:name/needs/contribute/:need', ensureAuthenticated, function(req, 
 									var msg = "Hello " + req.user.firstName + ",\n\nYou have pledged to contribute " + donationAmount + " of the needed items to the need '" + need.title + "'. The expected delivery date is " + pledgeDate + "."
 										+ "\n\nOnce the items have been delivered and the donation status has been updated, the donation will appear on the site. \n\nThank you so much!\n\nOrganization address:\n\n" + org.address + "\n" + org.city + ", " + org.state + " " + org.zip;
 									var subject = "FaithByDeeds - You've just made a pledge!";
-									sendEmail(subject, msg, req.user.email);									
+									sendEmail(subject, msg, req.user.email);
 
-									var msg = req.user.firstName + " " + req.user.lastName + " (" + req.user.email + ") has pledged to donate to your need, '" + need.title + "'!\n\n" 
+									var msg = req.user.firstName + " " + req.user.lastName + " (" + req.user.email + ") has pledged to donate to your need, '" + need.title + "'!\n\n"
 										+ "The status of the contribution is 'Pending'. Once the items have been delivered, the organization administrator should change the status to 'Approved'. \n\nQuantity: " + donationAmount + "\n\nExpected Delivery: " + pledgeDate;
 									var subject = "FaithByDeeds - There has been a donation made to your need!";
-									sendEmailCC(subject, msg, org.admin.email, need.creator.email);									
+									sendEmailCC(subject, msg, org.admin.email, need.creator.email);
 
 									req.flash('success_msg', 'You contributed to \''+ need.title + '\'');
 									res.redirect('/org/' + org.shortPath + '/needs');
@@ -598,10 +600,10 @@ router.get('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, ne
 					if (isAdvocateOfNeed(need, req.user)) {
 						res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 							user: req.user,
-							title: org.name, 
-							org: org, 
-							pageHeader: 'Edit Need', 
-							isAdmin: isAdmin(org, req.user), 
+							title: org.name,
+							org: org,
+							pageHeader: 'Edit Need',
+							isAdmin: isAdmin(org, req.user),
 							isSubscriber: isSubscriber(org, req.user),
 							need: need,
 						});
@@ -658,14 +660,14 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 							if (!result.isEmpty()){
 								res.render('org/orgEditNeed', {layout: 'layouts/orgLayout',
 									user: req.user,
-									title: org.name, 
-									org: org, 
-									pageHeader: 'Edit Need', 
-									isAdmin: isAdmin(org, req.user), 
+									title: org.name,
+									org: org,
+									pageHeader: 'Edit Need',
+									isAdmin: isAdmin(org, req.user),
 									isSubscriber: isSubscriber(org, req.user),
 									need: need,
-									errors: result.useFirstErrorOnly().array(),	
-								});						
+									errors: result.useFirstErrorOnly().array(),
+								});
 							} else {
 								//Make sure that the specified department exists and has the user listed as advocate
 								var deptArray = []; //The list of depts the user is an advocate for
@@ -700,7 +702,7 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 										need.needType = needType;
 										need.department = department;
 										need.needDate = needDate;
-										
+
 										//Save the need and the organization
 										need.save();
 
@@ -708,7 +710,7 @@ router.post('/:name/needs/edit/:need', ensureAuthenticated, function(req, res, n
 										res.redirect('/org/' + org.shortPath + '/needs');
 									}
 								});
-							
+
 							}
 						});
 
@@ -779,17 +781,17 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 										contribution.status = "approved";
 										contribution.save();
 										need.currentAmount += contribution.contributionAmount;
-										
+
 										/* Send email to contributor and org admin */
 										var msg = "Hello,\n\nYou have contributed $" + parseFloat(contribution.contributionAmount).toFixed(2) + " to the need '" + need.title + "'.\n\nThank you!";
 										var subject = "FaithByDeeds - You've just made a contribution!";
-										sendEmail(subject, msg, contribution.contributor.email);									
+										sendEmail(subject, msg, contribution.contributor.email);
 
-										var msg = contribution.contributor.firstName + " " + contribution.contributor.lastName + " (" + contribution.contributor.email + ") has donated to your need, '" + need.title + "'!\n\n" 
+										var msg = contribution.contributor.firstName + " " + contribution.contributor.lastName + " (" + contribution.contributor.email + ") has donated to your need, '" + need.title + "'!\n\n"
 											+ "Amount: $" + parseFloat(contribution.contributionAmount).toFixed(2);
 										var subject = "FaithByDeeds - There has been a donation made to your need!";
-										sendEmailCC(subject, msg, org.admin.email, need.creator.email);					
-										
+										sendEmailCC(subject, msg, org.admin.email, need.creator.email);
+
 										need.save();
 									} else {
 
@@ -801,7 +803,7 @@ router.post('/:name/needs/IPNhandler', function(req, res, next) {
 						});
 					} else {
 
-					} 
+					}
 				}
 			});
 
@@ -820,10 +822,10 @@ router.get('/:name/theme', ensureAuthenticated, function(req, res, next) {
 		if (org){
 			if (isAdmin(org, req.user)) {
 				res.render('org/orgThemeSettings', {layout: 'layouts/orgLayout',
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Theme Settings', 
-					isAdmin: true, 
+					title: org.name,
+					org: org,
+					pageHeader: 'Theme Settings',
+					isAdmin: true,
 					isSubscriber: true,
 				});
 			} else {
@@ -831,7 +833,7 @@ router.get('/:name/theme', ensureAuthenticated, function(req, res, next) {
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -840,7 +842,7 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 	Organization.findOne({shortPath: req.params.name}).populate('admin').exec(function(err, org){
 		if (err) throw err;
 		if (org){
-			if (isAdmin(org, req.user)) {	
+			if (isAdmin(org, req.user)) {
 				//Update org
 				var primaryColor = req.body.primaryColor;
 				var secondaryColor = req.body.secondaryColor;
@@ -853,17 +855,17 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 				req.assert('secondaryColor', 'There was an issue with the primary color.').isLength(6, 6);
 				req.assert('secondaryColor', 'There was an issue with the primary color.').matches(/^[a-fA-F0-9]*$/g);
 				req.assert('welcomeText', 'Welcome text should be 200-400 characters.').isLength(200,400);
-				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(150,350);			
+				req.assert('thankYouText', 'Thank you text should be 150-350 characters.').isLength(150,350);
 
 				req.getValidationResult().then(function(result){
 
 					if (!result.isEmpty()){
 						res.render('org/orgThemeSettings', {layout: 'layouts/orgLayout',
-							title: org.name, 
-							org: org, 
-							pageHeader: 'Theme Settings', 
+							title: org.name,
+							org: org,
+							pageHeader: 'Theme Settings',
 							isAdmin: true,
-							errors: result.useFirstErrorOnly().array(),							
+							errors: result.useFirstErrorOnly().array(),
 						});
 					} else {
 						//Assigning
@@ -879,12 +881,12 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 						if (req.files.logo){
 							var logo = {
 						 		fileName: req.files.logo[0].filename,
-								originalName: req.files.logo[0].originalname						
+								originalName: req.files.logo[0].originalname
 							}
 
 							//Remove old logo from disk if there is one
 							if (org.logo){
-								var filePath = './public/uploads/' + org.logo.fileName; 
+								var filePath = './public/uploads/' + org.logo.fileName;
 								fs.unlinkSync(filePath);
 							}
 
@@ -894,11 +896,11 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 						if (req.files.welcomeImage){
 							var welcomeImage = {
 						 		fileName: req.files.welcomeImage[0].filename,
-								originalName: req.files.welcomeImage[0].originalname						
+								originalName: req.files.welcomeImage[0].originalname
 							}
 							//Remove old welcome image from disk if there is one
 							if (org.welcomeImage){
-								var filePath = './public/uploads/' + org.welcomeImage.fileName; 
+								var filePath = './public/uploads/' + org.welcomeImage.fileName;
 								fs.unlinkSync(filePath);
 							}
 							org.welcomeImage = welcomeImage;
@@ -919,7 +921,7 @@ router.post('/:name/theme', ensureAuthenticated, uploading.fields([{name: 'logo'
 		} else {
 			next();
 		}
-	
+
 	});
 });
 
@@ -943,7 +945,7 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 							req.flash('error', 'There was an error processing the request.');
 						}
 						res.redirect('/org/' + org.shortPath + '/departments');
-					});					
+					});
 				} else if (req.query.delete){
 
 					//Make sure there are no needs under this department
@@ -972,10 +974,10 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 					})
 				} else {
 					res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
-						title: org.name, 
-						org: org, 
-						pageHeader: 'Departments', 
-						isAdmin: true, 
+						title: org.name,
+						org: org,
+						pageHeader: 'Departments',
+						isAdmin: true,
 						isSubscriber: true,
 					});
 				}
@@ -984,7 +986,7 @@ router.get('/:name/departments', ensureAuthenticated, function(req, res, next) {
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -1003,13 +1005,13 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 					req.getValidationResult().then(function(result){
 						if (!result.isEmpty()){
 							res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
-								title: org.name, 
-								org: org, 
-								pageHeader: 'Departments', 
+								title: org.name,
+								org: org,
+								pageHeader: 'Departments',
 								isAdmin: true,
 								isSubscriber: true,
-								errors: result.useFirstErrorOnly().array(),	
-							});	
+								errors: result.useFirstErrorOnly().array(),
+							});
 						} else {
 							var dept = _.filter(org.departments, function(o){ return (o.id == req.body.deptId)});
 
@@ -1021,7 +1023,7 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 								if (advocate.length > 0) {
 									//The advocate already exists
 									req.flash('error', 'The specified advocate already exists for this department.');
-									res.redirect('/org/' + org.shortPath + '/departments');										
+									res.redirect('/org/' + org.shortPath + '/departments');
 								} else {
 
 									User.findOne({email: req.body.advocateEmail.toLowerCase()}).exec(function(err, user){
@@ -1032,17 +1034,17 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 											dept[0].advocates.push(user.id);
 											dept[0].save();
 											req.flash('success_msg', 'The advocate was successfully added.');
-											res.redirect('/org/' + org.shortPath + '/departments');	
+											res.redirect('/org/' + org.shortPath + '/departments');
 										} else {
 											req.flash('error', 'A user with that email address does not exist. Make sure the user has a FaihByDeeds account.');
-											res.redirect('/org/' + org.shortPath + '/departments');	
+											res.redirect('/org/' + org.shortPath + '/departments');
 										}
 
 									});
-								}							
+								}
 							} else {
 								req.flash('error', 'There was a problem processing the request');
-								res.redirect('/org/' + org.shortPath + '/departments');	
+								res.redirect('/org/' + org.shortPath + '/departments');
 							}
 						}
 					});
@@ -1056,13 +1058,13 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 					req.getValidationResult().then(function(result){
 						if (!result.isEmpty()){
 							res.render('org/orgDepartments', {layout: 'layouts/orgLayout',
-								title: org.name, 
-								org: org, 
-								pageHeader: 'Departments', 
+								title: org.name,
+								org: org,
+								pageHeader: 'Departments',
 								isAdmin: true,
 								isSubscriber: true,
-								errors: result.useFirstErrorOnly().array(),	
-							});						
+								errors: result.useFirstErrorOnly().array(),
+							});
 						} else {
 							//Create the department
 							var newDepartment = new Department({
@@ -1083,7 +1085,7 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 							org.save();
 
 							req.flash('success_msg', 'Department was successfully created.');
-							res.redirect('/org/' + org.shortPath + '/departments');					
+							res.redirect('/org/' + org.shortPath + '/departments');
 						}
 					});
 				}
@@ -1092,7 +1094,7 @@ router.post('/:name/departments', ensureAuthenticated, function(req, res, next) 
 			}
 		} else {
 			next();
-		}	
+		}
 	});
 });
 
@@ -1105,10 +1107,10 @@ router.get('/:name/donations', ensureAuthenticated, function(req, res, next) {
 				Contribution.find({organization: org.id}).populate('contributor need').exec(function(err, contributions){
 					if (err) throw err;
 					res.render('org/orgDonations', {layout: 'layouts/orgLayout',
-						title: org.name, 
-						org: org, 
-						pageHeader: 'Donation Management', 
-						isAdmin: true, 
+						title: org.name,
+						org: org,
+						pageHeader: 'Donation Management',
+						isAdmin: true,
 						isSubscriber: true,
 						monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
 						nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),
@@ -1133,7 +1135,7 @@ router.post('/:name/donations', ensureAuthenticated, function(req, res, next) {
 					if (err) throw err;
 					if (contribution) {
 						if ((["pending", "declined", "approved"].indexOf(req.body.status) != -1) && contribution.need.needType == "non-monetary") {
-							
+
 							//Update the need's currentAmount
 							if (contribution.status == "approved" && req.body.status != "approved") { //Going from approved to declined or pending -- back out the current amount
 								contribution.need.currentAmount -= contribution.contributionAmount;
@@ -1155,7 +1157,7 @@ router.post('/:name/donations', ensureAuthenticated, function(req, res, next) {
 						}
 					} else {
 						req.flash('error', 'There was a problem processing the request.');
-						res.redirect('/org/' + org.shortPath + '/donations');						
+						res.redirect('/org/' + org.shortPath + '/donations');
 					}
 				});
 			} else {
@@ -1175,10 +1177,10 @@ router.get('/:name/subscribers', ensureAuthenticated, function(req, res, next) {
 			if (isAdmin(org, req.user)) {
 				if (err) throw err;
 				res.render('org/orgSubscribers', {layout: 'layouts/orgLayout',
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Subscribers', 
-					isAdmin: true, 
+					title: org.name,
+					org: org,
+					pageHeader: 'Subscribers',
+					isAdmin: true,
 					isSubscriber: true,
 				});
 			} else {
@@ -1198,10 +1200,10 @@ router.get('/:name/orgsettings', ensureAuthenticated, function(req, res, next) {
 			if (isAdmin(org, req.user)) {
 				if (err) throw err;
 				res.render('org/orgSettings', {layout: 'layouts/orgLayout',
-					title: org.name, 
-					org: org, 
-					pageHeader: 'Basic Settings', 
-					isAdmin: true, 
+					title: org.name,
+					org: org,
+					pageHeader: 'Basic Settings',
+					isAdmin: true,
 					isSubscriber: true,
 				});
 			} else {
@@ -1236,7 +1238,7 @@ router.post('/:name/orgsettings', ensureAuthenticated, function(req, res, next) 
 				req.assert('address', 'Address is required.').notEmpty();
 				req.assert('city', 'City is required.').notEmpty();
 				req.assert('state', 'State is required.').notEmpty();
-				req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars	
+				req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars
 				req.assert('payment', 'Payment method is required.').notEmpty();
 
 				req.getValidationResult().then(function(result){
@@ -1244,13 +1246,13 @@ router.post('/:name/orgsettings', ensureAuthenticated, function(req, res, next) 
 						res.render('org/orgSettings', {
 							layout: 'layouts/orgLayout',
 							title: org.name,
-							org: org, 
+							org: org,
 							pageHeader: 'Basic Settings',
-							isAdmin: true, 
+							isAdmin: true,
 							isSubscriber: true,
 							errors: result.useFirstErrorOnly().array(),
 						});
-					} else {						
+					} else {
 						org.name = orgName,
 						org.email = email,
 						org.address = address,

@@ -51,6 +51,7 @@
 					<input class="form-control" id="confirmPassword" name="confirmPassword" type="password">
 				</div>
 			</div>
+			{{#if captchaEnabled}}
 			<div class="form-group row">
 				<div class="col-xs-12">
 					<div style="float:right;">
@@ -58,18 +59,19 @@
 					</div>
 				</div>
 			</div>
+			{{/if}}
 			<div class="form-group row">
 				<div class="col-xs-12">
 					<input type="submit" class="btn" value="Register">
 				</div>
-			</div>				
+			</div>
 		</form>
 	</div>
 	<div class="col-xs-1" style="border-right: solid 1px #eee;height:350px;"></div>
 	<div class="col-xs-5 sidebar">
 		<p>
 			With one FaithByDeeds account, you will have access to all site-wide features. This includes:
-		</p> 
+		</p>
 				<ul>
 					<li>Creating and managing up to 5 FaithBydeeds sites</li>
 					<li>Publishing and sharing organization needs</li>

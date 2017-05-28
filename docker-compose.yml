@@ -1,0 +1,35 @@
+# This is the base docker-compose config.
+# By default, `docker-compose up` combines this file and docker-compose.override.yml
+# Production deployments with docker-compose combine this file with docker-compose.prod.yml
+
+version: '2'
+services:
+    app:
+        build:
+          context: ./app
+        command: nodemon bin/www
+        restart: unless-stopped
+        env_file: .env
+        links:
+            - mongo:mongo
+            - mail:mail
+        depends_on:
+            - mongo
+        ports:
+            - "3000:3000"
+        volumes:
+        - ./app:/usr/src/app
+        - /usr/src/app/node_modules
+    mongo:
+        image: mongo:3.4.1
+        env_file: .env
+        ports:
+            - "27017:27017"
+        volumes:
+            - /data/faithbydeeds/mongodb:/data/db
+    mail:
+        image: mailhog/mailhog
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - "8025:8025"

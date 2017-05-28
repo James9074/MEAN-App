@@ -9,7 +9,7 @@ var path = require('path');
 var async = require('async');
 var LocalStrategy = require('passport-local').Strategy;
 var router = express.Router();
-var request = require('request');
+var request = require('request-promise');
 var bodyParser = require('body-parser');
 var Organization = require('../models/organization');
 var Department = require('../models/department');
@@ -20,7 +20,8 @@ var Config = require('../config.js');
 //Require and configure nodemailer
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
-    service: Config.emailService,
+    host: Config.emailHost,
+    port: Config.emailPort,
     auth: {
         user: Config.emailUser,
         pass: Config.emailPass,
@@ -37,7 +38,7 @@ function sendEmail(subject, msg, email) {
 	};
 
 	transporter.sendMail(mailOptions, (err, info) => {
-		if (error) throw error;
+		if (err) throw err;
 		//Message Sent
 	})
 }
@@ -118,7 +119,7 @@ router.get('/logout', function(req, res, next) {
 
 /* GET donation rept */
 router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req, res, next) {
-	
+
 	var beginning = new Date(req.query.beg);
 	var ending = new Date(req.query.end);
 	if (!req.query.beg) beginning = new Date(0);
@@ -127,24 +128,24 @@ router.get('/donation-rept', ensureAuthenticated, ensureSiteAdmin, function(req,
 	ending.setDate(ending.getDate() + 1);
 
 	Contribution.find({"createdAt": {"$gte": beginning, "$lt": ending}}).populate('need contributor').populate({path: 'need', populate: {path: 'organization'}}).exec(function(err, contributions){
-		res.render('base/donationRept', {layout: 'layouts/layout', 
-			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report', 
+		res.render('base/donationRept', {layout: 'layouts/layout',
+			title: 'Donation Report | FaithByDeeds', pageHeader: 'Donation Report',
 			isSiteAdmin: isSiteAdmin(req.user),
-			nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),			
+			nonMonetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "non-monetary")}), "createdAt").reverse(),
 			monetaryContributions: _.sortBy(_.filter(contributions, function(o){return (o.need.needType == "monetary" && o.status == "approved")}), "createdAt").reverse(),
 			beginning: req.query.beg,
-			ending: req.query.end, 
+			ending: req.query.end,
 		});
 	})
 });
 
 /* GET organizations */
 router.get('/organizations', ensureAuthenticated, ensureSiteAdmin, function(req, res, next) {
-	
+
 	Organization.find({}).populate('admin').exec(function(err, organizations){
 		if (err) throw err;
-		res.render('base/organizations', {layout: 'layouts/layout', 
-			title: 'Organizations | FaithByDeeds', pageHeader: 'Organizations', 
+		res.render('base/organizations', {layout: 'layouts/layout',
+			title: 'Organizations | FaithByDeeds', pageHeader: 'Organizations',
 			isSiteAdmin: isSiteAdmin(req.user),
 			organizations: organizations,
 		});
@@ -157,9 +158,9 @@ router.get('/dashboard', ensureAuthenticated, function(req, res, next) {
 	User.findOne({_id: req.user.id}).populate('organizations').populate('subscriptions', null, { admin: { $nin: [req.user.id] } }).exec(function(err, user){
 		if (err) throw err;
 		if(user) {
-			res.render('base/dashboard', {layout: 'layouts/layout', 
-				title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard', 
-				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'), 
+			res.render('base/dashboard', {layout: 'layouts/layout',
+				title: 'Dashboard | FaithByDeeds', pageHeader: 'Dashboard',
+				joinedDate: moment(user.createdAt).format('MMM DD, YYYY'),
 				orgs: user.organizations,
 				subbedOrgs: user.subscriptions,
 				activeMenuItem: 'dashboardMenuItem',
@@ -182,7 +183,7 @@ router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), funct
 		//Remove old avatar from disk if there is one
 		if (req.user.avatar){
 			var fs = require('fs');
-			var filePath = './public/uploads/' + req.user.avatar.fileName; 
+			var filePath = './public/uploads/' + req.user.avatar.fileName;
 			fs.unlinkSync(filePath);
 		}
 
@@ -197,8 +198,8 @@ router.post('/dashboard', ensureAuthenticated, uploading.single('avatar'), funct
 /* GET and POST to register */
 router.get('/register', function(req, res, next) {
 	res.render('base/register', {
-		layout: 'layouts/layout', 
-		title: 'Registration | FaithByDeeds', 
+		layout: 'layouts/layout',
+		title: 'Registration | FaithByDeeds',
 		pageHeader: 'Register',
 		activeMenuItem: 'registerMenuItem',
 		isSiteAdmin: isSiteAdmin(req.user),
@@ -206,9 +207,8 @@ router.get('/register', function(req, res, next) {
 });
 
 router.post('/register', function(req, res, next){
- 
-	// if its blank or null means user has not selected the captcha, so return the error.
-	if(req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null) {
+  // if its blank or null means user has not selected the captcha, so return the error.
+	if(Config.environment === 'production' && (req.body['g-recaptcha-response'] === undefined || req.body['g-recaptcha-response'] === '' || req.body['g-recaptcha-response'] === null)) {
 
 		return res.render('base/register', {
 			error: 'You must select the captcha to verify that you are not a robot.',
@@ -216,92 +216,115 @@ router.post('/register', function(req, res, next){
 			title: 'Registration',
 			pageHeader: 'Register',
 			isSiteAdmin: isSiteAdmin(req.user),
-			params: req.body,	
+			params: req.body,
+      captchaEnabled: Config.environment === 'production'
 		});
 
 	} else {
-		var secretKey = "6LcC4B4UAAAAAI91rdS6S-HAep67XE4k1yBhO-qy";
+		var secretKey = Config.recaptchaSecretKey;
 
-		// req.connection.remoteAddress will provide IP address of connected user.
-		var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
-		// Hitting GET request to the URL, Google will respond with success or error scenario.
-		request(verificationUrl,function(error,response,body) {
-			body = JSON.parse(body);
-			// Success will be true or false depending upon captcha validation.
-			if(body.success !== undefined && !body.success) {
+    if(Config.environment != 'production' || secretKey === undefined){
+      processRegistration(req, res);
+    }
+    else{
+  		// req.connection.remoteAddress will provide IP address of connected user.
+  		var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
+  		// Hitting GET request to the URL, Google will respond with success or error scenario.
+  		request({uri:verificationUrl,json:true}).then((body)=>{
+        //Failed reCaptcha, prompt the user to try again
+        if(body.success !== undefined && !body.success) {
+  				return res.render('base/register', {
+  					error: 'The captcha verification failed.',
+  					layout: 'layouts/layout',
+  					title: 'Registration',
+  					pageHeader: 'Register',
+  					isSiteAdmin: isSiteAdmin(req.user),
+  					params: req.body,
+            captchaEnabled: Config.environment === 'production'
+  				});
+  			}
+        else{
+          return processRegistration(req, res);
+        }
+  		}).catch((err)=>{
+        return res.render('base/register', {
+          error: 'The captcha verification server is offline. Try again later',
+          layout: 'layouts/layout',
+          title: 'Registration',
+          pageHeader: 'Register',
+          isSiteAdmin: isSiteAdmin(req.user),
+          params: req.body,
+          captchaEnabled: Config.environment === 'production'
+        });
+      });
+    }
 
-				return res.render('base/register', {
-					error: 'The captcha verification failed.',
-					layout: 'layouts/layout',
-					title: 'Registration',
-					pageHeader: 'Register',
-					isSiteAdmin: isSiteAdmin(req.user),
-					params: req.body,	
-				});
+    function processRegistration(req, res){
+			var firstName = req.body.firstName;
+			var lastName = req.body.lastName;
+			var email = req.body.email;
+			var password = req.body.password;
+			var confirmPassword = req.body.confirmPassword;
 
-			} else{
-				//Success
-				var firstName = req.body.firstName;
-				var lastName = req.body.lastName;
-				var email = req.body.email;
-				var password = req.body.password;
-				var confirmPassword = req.body.confirmPassword;
+			//Validation
+			req.assert('firstName', 'First name is required.').notEmpty();
+			req.assert('lastName', 'Last name is required.').notEmpty();
+			req.assert('email', 'Email is required.').notEmpty();
+			req.assert('email', 'Email is not valid.').isEmail();
+			req.assert('password', 'Password is required.').notEmpty();
+			req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);
+			req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);
 
-				//Validation
-				req.assert('firstName', 'First name is required.').notEmpty();
-				req.assert('lastName', 'Last name is required.').notEmpty();
-				req.assert('email', 'Email is required.').notEmpty();
-				req.assert('email', 'Email is not valid.').isEmail();
-				req.assert('password', 'Password is required.').notEmpty();
-				req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
-				req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
+			req.getValidationResult().then(function(result){
 
-				req.getValidationResult().then(function(result){
+				if (!result.isEmpty()){
+					return res.render('base/register', {
+						layout: 'layouts/layout',
+						title: 'Registration',
+						pageHeader: 'Register',
+						errors: result.useFirstErrorOnly().array(),
+						isSiteAdmin: isSiteAdmin(req.user),
+						params: req.body,
+            captchaEnabled: Config.environment === 'production'
+					});
+				} else {
+					var newUser = new User({
+						firstName: firstName,
+						lastName: lastName,
+						email: email,
+						password: password
+					});
 
-					if (!result.isEmpty()){
-						return res.render('base/register', {
-							layout: 'layouts/layout',
-							title: 'Registration',
-							pageHeader: 'Register',
-							errors: result.useFirstErrorOnly().array(),
-							isSiteAdmin: isSiteAdmin(req.user),
-							params: req.body,	
-						});
-					} else {
-						var newUser = new User({
-							firstName: firstName,
-							lastName: lastName,
-							email: email,
-							password: password
-						});
+          console.log(User, newUser);
 
-						User.findOne({email: email.toLowerCase()}).exec(function(err, user) {
-							if (!user) {
-								User.createUser(newUser, function(err, user){
-									if ( err ) throw err;
-									var msg = "Hello,\n\nYou've successfully created a FaithByDeeds account! To login and access your dashboard, go to the following URL:\n\n" + req.protocol + '://' + req.get('host') + "/login";
-									var subject = "FaithByDeeds - Thanks for signing up!";
-									sendEmail(subject, msg, email);
+					User.findOne({email: email.toLowerCase()}).exec(function(err, user) {
+            console.log(err);
+						if (!user) {
+							User.createUser(newUser, function(err, user){
+								if ( err ) throw err;
+								var msg = "Hello,\n\nYou've successfully created a FaithByDeeds account! To login and access your dashboard, go to the following URL:\n\n" + req.protocol + '://' + req.get('host') + "/login";
+								var subject = "FaithByDeeds - Thanks for signing up!";
+								sendEmail(subject, msg, email);
 
-									req.flash('success_msg', 'You are now registered! You may log in.');
-									return res.redirect('/login');
-								});				
-							} else {
-								return res.render('base/register', {
-									error: 'Email already in use.',
-									layout: 'layouts/layout',
-									title: 'Registration',
-									pageHeader: 'Register',
-									isSiteAdmin: isSiteAdmin(req.user),
-									params: req.body,	
-								});
-							}
-						});
+								req.flash('success_msg', 'You are now registered! You may log in.');
+								return res.redirect('/login');
+							});
+						} else {
+							return res.render('base/register', {
+								error: 'Email already in use.',
+								layout: 'layouts/layout',
+								title: 'Registration',
+								pageHeader: 'Register',
+								isSiteAdmin: isSiteAdmin(req.user),
+								params: req.body,
+                captchaEnabled: Config.environment === 'production'
+							});
+						}
+					});
 
-					}
-				});
-			}
-		});
+				}
+			});
+    }
 	}
 });
 
@@ -419,8 +442,8 @@ router.post('/reset/:token', function(req, res) {
 		var confirmPassword = req.body.confirmPassword;
 
 		req.assert('password', 'Password is required.').notEmpty();
-		req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);	
-		req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);	
+		req.assert('password', 'Password must be between 5 to 20 characters.').isLength(5, 20);
+		req.assert('confirmPassword', 'Passwords do not match.').equals(req.body.password);
 
 		req.getValidationResult().then(function(result){
 
@@ -479,7 +502,7 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 	req.assert('address', 'Address is required.').notEmpty();
 	req.assert('city', 'City is required.').notEmpty();
 	req.assert('state', 'State is required.').notEmpty();
-	req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars	
+	req.assert('zip', 'Zip is not valid.').isLength(5, 5).isInt(); //Between 5 and 5 chars
 	req.assert('short', 'Short path is required.').notEmpty();
 	req.assert('short', 'Short path can not contain special characters or spaces.').matches(/^[a-zA-Z0-9]*$/g);
 	req.assert('short', 'Short path must be between 5 to 20 characters.').isLength(5, 20);
@@ -544,7 +567,7 @@ router.post('/org-create', ensureAuthenticated, function(req, res, next){
 						pageHeader: 'Create Organization',
 						isSiteAdmin: isSiteAdmin(req.user),
 						params: req.body,
-					});			
+					});
 				} else {
 
 					/* Send email */
